@@ -4,110 +4,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#061b35">
 <title>FISHING WORLD</title>
-
 <style>
 *{box-sizing:border-box}
-html,body{
- margin:0;width:100%;height:100%;
- overflow:hidden;background:#061b35;
- font-family:Arial;color:white;
-}
-canvas{display:block;width:100%;height:100%}
-
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#061b35;font-family:Arial;color:white}
+canvas{display:block}
 #menu{
  position:absolute;inset:0;z-index:10;
  display:flex;flex-direction:column;
- align-items:center;justify-content:center;
- gap:13px;padding:20px;
+ justify-content:center;align-items:center;gap:13px;
  background:linear-gradient(180deg,#061b35,#087eae);
 }
-#menu h1{
- color:#65ddff;font-size:34px;
- text-align:center;margin:0 0 5px;
- letter-spacing:2px;
-}
-#menu .subtitle{
- color:#b9eaff;font-size:11px;
- letter-spacing:2px;margin-bottom:20px;
-}
+#menu h1{color:#65ddff;font-size:32px;letter-spacing:2px}
+.subtitle{color:#b9eaff;font-size:11px;margin-bottom:15px}
 .menu-button{
- width:min(330px,90vw);
- height:58px;
- border:2px solid #65ddff;
- border-radius:12px;
- background:#087eae;
- color:white;
- font-size:17px;
- font-weight:bold;
+ width:min(330px,90vw);height:58px;
+ border:2px solid #65ddff;border-radius:12px;
+ background:#087eae;color:white;
+ font-size:17px;font-weight:bold;
 }
-.menu-button:active{background:#0b9bcf}
-
 #hud{
  position:absolute;top:12px;left:12px;right:12px;
- display:none;justify-content:space-between;
- gap:8px;pointer-events:none;
+ display:none;justify-content:space-between;gap:8px;
+ pointer-events:none;
 }
-.panel{
- background:#06243acc;padding:10px 12px;
- border:1px solid #40cfff;border-radius:12px;
- font-size:14px;
-}
-#message{
- position:absolute;top:65px;width:100%;
- text-align:center;text-shadow:0 2px 5px black;
- font-weight:bold;
-}
-#controls{
- position:absolute;bottom:12px;left:12px;right:12px;
- display:none;justify-content:space-between;
- align-items:end;
-}
+.panel{background:#06243acc;padding:10px;border:1px solid #40cfff;border-radius:12px}
+#message{position:absolute;top:65px;width:100%;text-align:center;text-shadow:0 2px 5px black}
+#controls{position:absolute;bottom:12px;left:12px;right:12px;display:none;justify-content:space-between}
 .control-group{display:flex;gap:7px}
 .control-button{
- min-width:58px;min-height:54px;
- padding:9px;border:1px solid #65ddff;
- border-radius:13px;background:#087eae;
- color:white;font-weight:bold;font-size:14px;
+ min-width:55px;min-height:54px;padding:9px;
+ border:1px solid #65ddff;border-radius:12px;
+ background:#087eae;color:white;font-weight:bold;
  touch-action:none;
 }
+#speed{display:none;position:absolute;bottom:85px;right:15px;background:#06243acc;padding:10px;border-radius:10px}
 #popup{
- display:none;position:absolute;z-index:20;
- inset:0;background:#000b;
- align-items:center;justify-content:center;
- padding:20px;
+ display:none;position:absolute;z-index:20;inset:0;
+ background:#000b;align-items:center;justify-content:center;padding:20px;
 }
 #popup-box{
- width:min(330px,90vw);
- background:#082b48;border:2px solid #65ddff;
- border-radius:16px;padding:25px;text-align:center;
+ width:min(330px,90vw);background:#082b48;
+ border:2px solid #65ddff;border-radius:16px;
+ padding:25px;text-align:center;
 }
-#popup-box h2{color:#65ddff}
-#popup-box button{
+#popup-title{color:#65ddff}
+#popup-close{
  width:100%;height:48px;margin-top:12px;
- border:0;border-radius:10px;
- background:#087eae;color:white;
- font-weight:bold;font-size:16px;
-}
-#speed{
- position:absolute;bottom:85px;right:15px;
- display:none;background:#06243acc;
- padding:9px 13px;border-radius:10px;
- border:1px solid #40cfff;
-}
-@media(orientation:portrait){
- #menu h1{font-size:28px}
+ border:0;border-radius:10px;background:#087eae;
+ color:white;font-weight:bold;font-size:16px;
 }
 </style>
 </head>
-
 <body>
 
 <div id="menu">
  <h1>FISHING WORLD</h1>
  <div class="subtitle">EXPLORE THE OCEAN</div>
-
  <button class="menu-button" id="start">▶ OYUNA BAŞLA</button>
  <button class="menu-button" id="multiplayer">🌐 MULTİPLAYER</button>
  <button class="menu-button" id="settings">⚙️ AYARLAR</button>
@@ -120,8 +73,7 @@ canvas{display:block;width:100%;height:100%}
  <div class="panel">🐟 <span id="caught">0</span></div>
 </div>
 
-<div id="message">Okyanusa hoş geldin!</div>
-
+<div id="message"></div>
 <div id="speed">HIZ: 0 KM/H</div>
 
 <div id="controls">
@@ -144,6 +96,41 @@ canvas{display:block;width:100%;height:100%}
   <button id="popup-close">KAPAT</button>
  </div>
 </div>
+
+<script>
+const menu=document.getElementById('menu');
+const popup=document.getElementById('popup');
+
+function showPopup(title,text){
+ document.getElementById('popup-title').innerText=title;
+ document.getElementById('popup-text').innerText=text;
+ popup.style.display='flex';
+}
+
+document.getElementById('multiplayer').onclick=()=>{
+ showPopup('MULTİPLAYER','Yakında sizlerle... 🌊');
+};
+
+document.getElementById('settings').onclick=()=>{
+ showPopup('AYARLAR','Kamera ve tekne kontrollerini oyun içinden değiştirebilirsin.');
+};
+
+document.getElementById('garage').onclick=()=>{
+ showPopup('TEKNE GARAJI','Yeni tekneler yakında!');
+};
+
+document.getElementById('popup-close').onclick=()=>{
+ popup.style.display='none';
+};
+
+document.getElementById('start').onclick=()=>{
+ if(typeof window.startFishingGame==='function'){
+  window.startFishingGame();
+ }else{
+  showPopup('YÜKLENİYOR','Oyun motoru yüklenemedi veya henüz hazır değil. js/game.js dosyasını kontrol et.');
+ }
+};
+</script>
 
 <script type="module" src="./js/game.js"></script>
 </body>
