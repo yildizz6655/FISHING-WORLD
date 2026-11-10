@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#061b35">
 <title>FISHING WORLD</title>
+
 <style>
 *{box-sizing:border-box}
 html,body{
@@ -14,9 +15,38 @@ html,body{
  font-family:Arial;color:white;
 }
 canvas{display:block;width:100%;height:100%}
+
+#menu{
+ position:absolute;inset:0;z-index:10;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ gap:13px;padding:20px;
+ background:linear-gradient(180deg,#061b35,#087eae);
+}
+#menu h1{
+ color:#65ddff;font-size:34px;
+ text-align:center;margin:0 0 5px;
+ letter-spacing:2px;
+}
+#menu .subtitle{
+ color:#b9eaff;font-size:11px;
+ letter-spacing:2px;margin-bottom:20px;
+}
+.menu-button{
+ width:min(330px,90vw);
+ height:58px;
+ border:2px solid #65ddff;
+ border-radius:12px;
+ background:#087eae;
+ color:white;
+ font-size:17px;
+ font-weight:bold;
+}
+.menu-button:active{background:#0b9bcf}
+
 #hud{
  position:absolute;top:12px;left:12px;right:12px;
- display:flex;justify-content:space-between;
+ display:none;justify-content:space-between;
  gap:8px;pointer-events:none;
 }
 .panel{
@@ -30,51 +60,88 @@ canvas{display:block;width:100%;height:100%}
  font-weight:bold;
 }
 #controls{
- position:absolute;bottom:15px;left:15px;right:15px;
- display:flex;justify-content:space-between;
+ position:absolute;bottom:12px;left:12px;right:12px;
+ display:none;justify-content:space-between;
  align-items:end;
 }
-.control-group{display:flex;gap:8px}
-button{
- min-width:55px;min-height:52px;
- padding:10px;border:1px solid #65ddff;
+.control-group{display:flex;gap:7px}
+.control-button{
+ min-width:58px;min-height:54px;
+ padding:9px;border:1px solid #65ddff;
  border-radius:13px;background:#087eae;
- color:white;font-weight:bold;font-size:15px;
+ color:white;font-weight:bold;font-size:14px;
  touch-action:none;
 }
-#fish{background:#087eae}
-@media screen and (orientation:landscape){
- #hud{top:8px}
- #controls{bottom:10px}
- button{min-width:65px;min-height:58px}
+#popup{
+ display:none;position:absolute;z-index:20;
+ inset:0;background:#000b;
+ align-items:center;justify-content:center;
+ padding:20px;
 }
-@media screen and (orientation:portrait){
- #message:after{
-  content:" Telefonunu yatay çevir!";
-  display:block;margin-top:10px;color:#65ddff;
- }
+#popup-box{
+ width:min(330px,90vw);
+ background:#082b48;border:2px solid #65ddff;
+ border-radius:16px;padding:25px;text-align:center;
+}
+#popup-box h2{color:#65ddff}
+#popup-box button{
+ width:100%;height:48px;margin-top:12px;
+ border:0;border-radius:10px;
+ background:#087eae;color:white;
+ font-weight:bold;font-size:16px;
+}
+#speed{
+ position:absolute;bottom:85px;right:15px;
+ display:none;background:#06243acc;
+ padding:9px 13px;border-radius:10px;
+ border:1px solid #40cfff;
+}
+@media(orientation:portrait){
+ #menu h1{font-size:28px}
 }
 </style>
 </head>
+
 <body>
+
+<div id="menu">
+ <h1>FISHING WORLD</h1>
+ <div class="subtitle">EXPLORE THE OCEAN</div>
+
+ <button class="menu-button" id="start">▶ OYUNA BAŞLA</button>
+ <button class="menu-button" id="multiplayer">🌐 MULTİPLAYER</button>
+ <button class="menu-button" id="settings">⚙️ AYARLAR</button>
+ <button class="menu-button" id="garage">🚤 TEKNE GARAJI</button>
+</div>
 
 <div id="hud">
  <div class="panel">🎣 FISHING WORLD</div>
  <div class="panel">💰 <span id="money">1.000</span> TL</div>
- <div class="panel">🐟 <span id="caught">0</span> balık</div>
+ <div class="panel">🐟 <span id="caught">0</span></div>
 </div>
 
 <div id="message">Okyanusa hoş geldin!</div>
 
+<div id="speed">HIZ: 0 KM/H</div>
+
 <div id="controls">
  <div class="control-group">
-  <button id="left">◀</button>
-  <button id="right">▶</button>
+  <button class="control-button" id="left">◀</button>
+  <button class="control-button" id="right">▶</button>
  </div>
  <div class="control-group">
-  <button id="forward">▲ GAZ</button>
-  <button id="fish">🎣 OLTA</button>
-  <button id="camera">📷</button>
+  <button class="control-button" id="brake">FREN</button>
+  <button class="control-button" id="forward">GAZ ▲</button>
+  <button class="control-button" id="fish">🎣 OLTA</button>
+  <button class="control-button" id="camera">📷</button>
+ </div>
+</div>
+
+<div id="popup">
+ <div id="popup-box">
+  <h2 id="popup-title">FISHING WORLD</h2>
+  <p id="popup-text"></p>
+  <button id="popup-close">KAPAT</button>
  </div>
 </div>
 
