@@ -9,7 +9,9 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x86cbed);
 scene.fog = new THREE.Fog(0x86cbed, 120, 500);
 
-const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(
+  65, window.innerWidth / window.innerHeight, 0.1, 1000
+);
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
@@ -185,7 +187,13 @@ function createFish(x, z, color, size) {
 
 for (let i = 0; i < 15; i++) {
   const colors = [0xffaa22, 0xff5555, 0xdddddd, 0x44ccaa];
-  createFish((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, colors[i % colors.length], 0.5 + Math.random() * 0.6);
+
+  createFish(
+    (Math.random() - 0.5) * 100,
+    (Math.random() - 0.5) * 100,
+    colors[i % colors.length],
+    0.5 + Math.random() * 0.6
+  );
 }
 
 // =====================================
@@ -294,8 +302,9 @@ let wheelAngle = 0;
 let draggingWheel = false;
 let previousPointerAngle = 0;
 
+// DİREKSİYON HER İKİ KAMERADA DA GÖRÜNÜR
 function updateWheelVisibility() {
-  wheel.style.display = gameStarted && firstPerson ? 'block' : 'none';
+  wheel.style.display = gameStarted ? 'block' : 'none';
 
   const leftButton = document.getElementById('left');
   const rightButton = document.getElementById('right');
@@ -315,13 +324,16 @@ function pointerAngle(event) {
 
 wheel.addEventListener('pointerdown', event => {
   event.preventDefault();
+
   draggingWheel = true;
   previousPointerAngle = pointerAngle(event);
+
   wheel.setPointerCapture(event.pointerId);
 });
 
 wheel.addEventListener('pointermove', event => {
   if (!draggingWheel) return;
+
   event.preventDefault();
 
   const currentAngle = pointerAngle(event);
@@ -331,8 +343,10 @@ wheel.addEventListener('pointermove', event => {
   if (difference < -Math.PI) difference += Math.PI * 2;
 
   previousPointerAngle = currentAngle;
+
   wheelAngle += difference;
   wheelAngle = THREE.MathUtils.clamp(wheelAngle, -1.2, 1.2);
+
   steeringValue = wheelAngle / 1.2;
 
   wheelRing.style.transform = `rotate(${wheelAngle * 100}deg)`;
@@ -449,17 +463,62 @@ document.head.appendChild(pedalStyle);
 document.getElementById('forward').innerHTML = '▲<br>GAZ';
 document.getElementById('brake').innerHTML = '▼<br>FREN';
 
-// KAMERA
-document.getElementById('camera').onclick = () => {
+// =====================================
+// KAMERA BUTONU
+// =====================================
+
+const cameraButton = document.getElementById('camera');
+
+cameraButton.innerText = '📷';
+
+const cameraStyle = document.createElement('style');
+
+cameraStyle.textContent = `
+#camera {
+  position: fixed !important;
+  top: 15px !important;
+  right: 15px !important;
+  left: auto !important;
+  bottom: auto !important;
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  padding: 0 !important;
+  border: 2px solid #ffffffaa !important;
+  border-radius: 50% !important;
+  background: #102c46cc !important;
+  color: white !important;
+  font-size: 25px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000000 !important;
+  box-shadow: 0 4px 12px #0008 !important;
+  touch-action: manipulation !important;
+}
+
+#camera:active {
+  transform: scale(0.9);
+}
+`;
+
+document.head.appendChild(cameraStyle);
+
+// KAMERA DEĞİŞTİRME
+cameraButton.onclick = () => {
   firstPerson = !firstPerson;
+
   updateWheelVisibility();
 
   message.innerText = firstPerson
-    ? 'Birinci şahıs kamera - Direksiyonu kullan!'
-    : 'Üçüncü şahıs kamera';
+    ? 'Birinci şahıs kamera!'
+    : 'Üçüncü şahıs kamera!';
 };
 
+// =====================================
 // KLAVYE
+// =====================================
+
 window.addEventListener('keydown', event => {
   if (event.key === 'w' || event.key === 'ArrowUp') keys.forward = true;
   if (event.key === 's' || event.key === 'ArrowDown') keys.brake = true;
@@ -533,7 +592,9 @@ function fishingAction() {
     money += reward;
     caughtCount++;
 
-    document.getElementById('money').innerText = money.toLocaleString('tr-TR');
+    document.getElementById('money').innerText =
+      money.toLocaleString('tr-TR');
+
     document.getElementById('caught').innerText = caughtCount;
 
     message.innerText = 'Balığı yakaladın! +' + reward + ' TL!';
@@ -563,6 +624,7 @@ window.startFishingGame = function () {
   speedDisplay.style.display = 'block';
 
   message.innerText = 'Okyanusa hoş geldin!';
+
   updateWheelVisibility();
 };
 
@@ -603,12 +665,16 @@ function animate() {
       speed *= Math.pow(0.985, delta * 60);
     }
 
-    // DİREKSİYON
-    const steering = firstPerson
-      ? steeringValue
-      : Number(keys.left) - Number(keys.right);
+    // HER İKİ KAMERADA DA DİREKSİYON
+    const keyboardSteering =
+      Number(keys.left) - Number(keys.right);
 
-    boat.rotation.y += delta * steering * 1.3 * Math.max(0.15, speed / 12);
+    const steering = Math.abs(steeringValue) > 0.01
+      ? steeringValue
+      : keyboardSteering;
+
+    boat.rotation.y += delta * steering * 1.3 *
+      Math.max(0.15, speed / 12);
 
     // TEKNE HAREKETİ
     boat.position.x -= Math.sin(boat.rotation.y) * speed * delta;
@@ -624,16 +690,22 @@ function animate() {
     if (!draggingWheel) {
       wheelAngle *= Math.pow(0.08, delta);
       steeringValue = wheelAngle / 1.2;
-      wheelRing.style.transform = `rotate(${wheelAngle * 100}deg)`;
+
+      wheelRing.style.transform =
+        `rotate(${wheelAngle * 100}deg)`;
     }
   }
 
-  speedDisplay.innerText = 'HIZ: ' + Math.round(speed * 4) + ' KM/H';
+  speedDisplay.innerText =
+    'HIZ: ' + Math.round(speed * 4) + ' KM/H';
 
   // BALIK HAREKETLERİ
   fish.forEach(f => {
-    f.group.position.x = f.x + Math.sin(time + f.phase) * 2;
-    f.group.position.z = f.z + Math.cos(time * 0.7 + f.phase) * 2;
+    f.group.position.x =
+      f.x + Math.sin(time + f.phase) * 2;
+
+    f.group.position.z =
+      f.z + Math.cos(time * 0.7 + f.phase) * 2;
   });
 
   // OLTA ZAMANLAYICISI
@@ -650,7 +722,10 @@ function animate() {
   // ŞAMANDIRA VE OLTA İPİ
   if (fishingState !== 'idle') {
     const bobberOffset = new THREE.Vector3(1.2, 0, -13)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
+      .applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        boat.rotation.y
+      );
 
     const bobberPosition = boat.position.clone().add(bobberOffset);
 
@@ -665,7 +740,10 @@ function animate() {
     }
 
     const rodTip = new THREE.Vector3(1.2, 4.5, -3)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y)
+      .applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        boat.rotation.y
+      )
       .add(boat.position);
 
     fishingLine.geometry.setFromPoints([
@@ -682,13 +760,20 @@ function animate() {
   // KAMERA
   if (firstPerson) {
     const cameraOffset = new THREE.Vector3(0, 3.1, 0.5)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
+      .applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        boat.rotation.y
+      );
 
     const cameraTarget = boat.position.clone().add(cameraOffset);
+
     camera.position.copy(cameraTarget);
 
     const lookDirection = new THREE.Vector3(0, 2.8, -30)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
+      .applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        boat.rotation.y
+      );
 
     camera.lookAt(
       boat.position.x + lookDirection.x,
@@ -697,12 +782,20 @@ function animate() {
     );
   } else {
     const offset = new THREE.Vector3(0, 8, 15)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
+      .applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        boat.rotation.y
+      );
 
     const targetCamera = boat.position.clone().add(offset);
+
     camera.position.lerp(targetCamera, 0.1);
 
-    camera.lookAt(boat.position.x, boat.position.y + 1, boat.position.z);
+    camera.lookAt(
+      boat.position.x,
+      boat.position.y + 1,
+      boat.position.z
+    );
   }
 
   renderer.render(scene, camera);
@@ -718,4 +811,3 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-  
