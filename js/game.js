@@ -25,7 +25,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
 document.body.appendChild(renderer.domElement);
 
-// MENÜ
+// HTML ELEMANLARI
 const menu = document.getElementById('menu');
 const hud = document.getElementById('hud');
 const controls = document.getElementById('controls');
@@ -50,7 +50,6 @@ const sun = new THREE.DirectionalLight(0xfff1d0, 2.5);
 sun.position.set(-70, 100, 50);
 scene.add(sun);
 
-// PARÇA OLUŞTURMA
 function makePart(parent, geometry, color, x, y, z) {
   const mesh = new THREE.Mesh(
     geometry,
@@ -66,8 +65,12 @@ function makePart(parent, geometry, color, x, y, z) {
   return mesh;
 }
 
+// =====================================
 // DENİZ
+// =====================================
+
 const waterGeometry = new THREE.PlaneGeometry(600, 600, 70, 70);
+
 const waterMaterial = new THREE.MeshStandardMaterial({
   color: 0x087fa9,
   roughness: 0.22,
@@ -85,11 +88,11 @@ for (let i = 0; i < waterPositions.count; i++) {
   originalWaterZ.push(waterPositions.getZ(i));
 }
 
-// GÜNEŞ
 const sunMesh = new THREE.Mesh(
   new THREE.SphereGeometry(9, 24, 24),
   new THREE.MeshBasicMaterial({ color: 0xffe7a0 })
 );
+
 sunMesh.position.set(-100, 90, -180);
 scene.add(sunMesh);
 
@@ -149,7 +152,7 @@ for (const side of [-1, 1]) {
   makePart(boat, new THREE.BoxGeometry(0.12, 0.5, 5.5), 0xe4e4e4, side * 1.5, 2, 0);
 }
 
-// MOTOR VE PERVANE
+// MOTOR
 const motor = new THREE.Group();
 motor.position.set(0, 0.8, 4.2);
 boat.add(motor);
@@ -221,14 +224,14 @@ wheelStyle.textContent = `
   display: none;
   position: fixed !important;
   z-index: 999999 !important;
-  left: 20px;
-  bottom: 22px;
-  width: 145px;
-  height: 145px;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  pointer-events: auto;
+  left: 20px !important;
+  bottom: 22px !important;
+  width: 145px !important;
+  height: 145px !important;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: auto !important;
 }
 
 .wheel-ring {
@@ -283,12 +286,12 @@ wheelStyle.textContent = `
   border-radius: 50%;
 }
 
-@media (max-width:500px) {
+@media(max-width:500px) {
   #steering-wheel {
-    width: 125px;
-    height: 125px;
-    left: 14px;
-    bottom: 18px;
+    width: 125px !important;
+    height: 125px !important;
+    left: 12px !important;
+    bottom: 18px !important;
   }
 }
 `;
@@ -302,7 +305,6 @@ let wheelAngle = 0;
 let draggingWheel = false;
 let previousPointerAngle = 0;
 
-// DİREKSİYON HER İKİ KAMERADA DA GÖRÜNÜR
 function updateWheelVisibility() {
   wheel.style.display = gameStarted ? 'block' : 'none';
 
@@ -324,10 +326,8 @@ function pointerAngle(event) {
 
 wheel.addEventListener('pointerdown', event => {
   event.preventDefault();
-
   draggingWheel = true;
   previousPointerAngle = pointerAngle(event);
-
   wheel.setPointerCapture(event.pointerId);
 });
 
@@ -344,11 +344,13 @@ wheel.addEventListener('pointermove', event => {
 
   previousPointerAngle = currentAngle;
 
-  wheelAngle += difference;
-  wheelAngle = THREE.MathUtils.clamp(wheelAngle, -1.2, 1.2);
+  wheelAngle = THREE.MathUtils.clamp(
+    wheelAngle + difference,
+    -1.2,
+    1.2
+  );
 
   steeringValue = wheelAngle / 1.2;
-
   wheelRing.style.transform = `rotate(${wheelAngle * 100}deg)`;
 });
 
@@ -394,7 +396,7 @@ setControl('forward', 'forward');
 setControl('brake', 'brake');
 
 // =====================================
-// GAZ VE FREN PEDALI GÖRÜNÜMÜ
+// GAZ VE FREN GÖRÜNÜMÜ
 // =====================================
 
 const pedalStyle = document.createElement('style');
@@ -422,25 +424,13 @@ pedalStyle.textContent = `
 
 #forward {
   background:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0px,
-      transparent 10px,
-      #ffffff35 11px,
-      #ffffff35 14px
-    ),
+    repeating-linear-gradient(0deg,transparent 0px,transparent 10px,#ffffff35 11px,#ffffff35 14px),
     linear-gradient(135deg,#268d45,#145b2d) !important;
 }
 
 #brake {
   background:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0px,
-      transparent 10px,
-      #ffffff35 11px,
-      #ffffff35 14px
-    ),
+    repeating-linear-gradient(0deg,transparent 0px,transparent 10px,#ffffff35 11px,#ffffff35 14px),
     linear-gradient(135deg,#df4545,#8d1717) !important;
 }
 
@@ -460,60 +450,74 @@ pedalStyle.textContent = `
 
 document.head.appendChild(pedalStyle);
 
-document.getElementById('forward').innerHTML = '▲<br>GAZ';
-document.getElementById('brake').innerHTML = '▼<br>FREN';
+const gasButton = document.getElementById('forward');
+const brakeButton = document.getElementById('brake');
+
+if (gasButton) gasButton.innerHTML = '▲<br>GAZ';
+if (brakeButton) brakeButton.innerHTML = '▼<br>FREN';
 
 // =====================================
 // KAMERA BUTONU
 // =====================================
 
-const cameraButton = document.getElementById('camera');
+let cameraButton = document.getElementById('camera');
 
-cameraButton.innerText = '📷';
+if (!cameraButton) {
+  cameraButton = document.createElement('button');
+  cameraButton.id = 'camera';
+  document.body.appendChild(cameraButton);
+}
+
+cameraButton.type = 'button';
+cameraButton.textContent = '📷';
+cameraButton.setAttribute('aria-label', 'Kamerayı değiştir');
 
 const cameraStyle = document.createElement('style');
 
 cameraStyle.textContent = `
 #camera {
   position: fixed !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   top: 15px !important;
   right: 15px !important;
   left: auto !important;
   bottom: auto !important;
-  width: 52px !important;
-  height: 52px !important;
-  min-width: 52px !important;
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
   padding: 0 !important;
-  border: 2px solid #ffffffaa !important;
+  margin: 0 !important;
+  border: 1px solid #ffffff88 !important;
   border-radius: 50% !important;
   background: #102c46cc !important;
   color: white !important;
   font-size: 25px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  line-height: 1 !important;
   z-index: 1000000 !important;
   box-shadow: 0 4px 12px #0008 !important;
   touch-action: manipulation !important;
 }
 
 #camera:active {
-  transform: scale(0.9);
+  transform: scale(.9);
 }
 `;
 
 document.head.appendChild(cameraStyle);
 
-// KAMERA DEĞİŞTİRME
-cameraButton.onclick = () => {
+cameraButton.addEventListener('click', () => {
   firstPerson = !firstPerson;
 
-  updateWheelVisibility();
+  if (message) {
+    message.innerText = firstPerson
+      ? 'Birinci şahıs kamera!'
+      : 'Üçüncü şahıs kamera!';
+  }
 
-  message.innerText = firstPerson
-    ? 'Birinci şahıs kamera!'
-    : 'Üçüncü şahıs kamera!';
-};
+  updateWheelVisibility();
+});
 
 // =====================================
 // KLAVYE
@@ -564,6 +568,7 @@ rod.rotation.z = -0.25;
 
 function updateFishingButton() {
   const button = document.getElementById('fish');
+  if (!button) return;
 
   button.innerText =
     fishingState === 'idle' ? '🎣 OLTA' :
@@ -581,7 +586,8 @@ function fishingAction() {
     bobber.visible = true;
     fishingLine.visible = true;
 
-    message.innerText = 'Oltanı attın! Balık bekleniyor...';
+    if (message) message.innerText = 'Oltanı attın! Balık bekleniyor...';
+
     updateFishingButton();
     return;
   }
@@ -592,12 +598,13 @@ function fishingAction() {
     money += reward;
     caughtCount++;
 
-    document.getElementById('money').innerText =
-      money.toLocaleString('tr-TR');
+    const moneyDisplay = document.getElementById('money');
+    const caughtDisplay = document.getElementById('caught');
 
-    document.getElementById('caught').innerText = caughtCount;
+    if (moneyDisplay) moneyDisplay.innerText = money.toLocaleString('tr-TR');
+    if (caughtDisplay) caughtDisplay.innerText = caughtCount;
 
-    message.innerText = 'Balığı yakaladın! +' + reward + ' TL!';
+    if (message) message.innerText = 'Balığı yakaladın! +' + reward + ' TL!';
 
     fishingState = 'idle';
     bobber.visible = false;
@@ -605,11 +612,12 @@ function fishingAction() {
 
     updateFishingButton();
   } else {
-    message.innerText = 'Balığın gelmesini bekle!';
+    if (message) message.innerText = 'Balığın gelmesini bekle!';
   }
 }
 
-document.getElementById('fish').onclick = fishingAction;
+const fishButton = document.getElementById('fish');
+if (fishButton) fishButton.onclick = fishingAction;
 
 // =====================================
 // OYUNA BAŞLA
@@ -618,12 +626,14 @@ document.getElementById('fish').onclick = fishingAction;
 window.startFishingGame = function () {
   gameStarted = true;
 
-  menu.style.display = 'none';
-  hud.style.display = 'flex';
-  controls.style.display = 'flex';
-  speedDisplay.style.display = 'block';
+  if (menu) menu.style.display = 'none';
+  if (hud) hud.style.display = 'flex';
+  if (controls) controls.style.display = 'flex';
+  if (speedDisplay) speedDisplay.style.display = 'block';
 
-  message.innerText = 'Okyanusa hoş geldin!';
+  cameraButton.style.display = 'flex';
+
+  if (message) message.innerText = 'Okyanusa hoş geldin!';
 
   updateWheelVisibility();
 };
@@ -665,7 +675,7 @@ function animate() {
       speed *= Math.pow(0.985, delta * 60);
     }
 
-    // HER İKİ KAMERADA DA DİREKSİYON
+    // DİREKSİYON: HER İKİ KAMERA MODUNDA
     const keyboardSteering =
       Number(keys.left) - Number(keys.right);
 
@@ -683,29 +693,24 @@ function animate() {
     boat.position.y = Math.sin(time * 1.5) * 0.15;
     boat.rotation.z = Math.sin(time * 1.5) * 0.015;
 
-    // MOTOR
     propeller.rotation.z += delta * speed * 2;
 
-    // DİREKSİYONUN OTOMATİK ORTALANMASI
+    // DİREKSİYON OTOMATİK ORTALANIR
     if (!draggingWheel) {
       wheelAngle *= Math.pow(0.08, delta);
       steeringValue = wheelAngle / 1.2;
-
-      wheelRing.style.transform =
-        `rotate(${wheelAngle * 100}deg)`;
+      wheelRing.style.transform = `rotate(${wheelAngle * 100}deg)`;
     }
   }
 
-  speedDisplay.innerText =
-    'HIZ: ' + Math.round(speed * 4) + ' KM/H';
+  if (speedDisplay) {
+    speedDisplay.innerText = 'HIZ: ' + Math.round(speed * 4) + ' KM/H';
+  }
 
   // BALIK HAREKETLERİ
   fish.forEach(f => {
-    f.group.position.x =
-      f.x + Math.sin(time + f.phase) * 2;
-
-    f.group.position.z =
-      f.z + Math.cos(time * 0.7 + f.phase) * 2;
+    f.group.position.x = f.x + Math.sin(time + f.phase) * 2;
+    f.group.position.z = f.z + Math.cos(time * 0.7 + f.phase) * 2;
   });
 
   // OLTA ZAMANLAYICISI
@@ -714,7 +719,7 @@ function animate() {
 
     if (fishingTime > 5) {
       fishingState = 'bite';
-      message.innerText = 'BALIK OLTAYA TAKILDI! HEMEN ÇEK!';
+      if (message) message.innerText = 'BALIK OLTAYA TAKILDI! HEMEN ÇEK!';
       updateFishingButton();
     }
   }
@@ -722,10 +727,7 @@ function animate() {
   // ŞAMANDIRA VE OLTA İPİ
   if (fishingState !== 'idle') {
     const bobberOffset = new THREE.Vector3(1.2, 0, -13)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
     const bobberPosition = boat.position.clone().add(bobberOffset);
 
@@ -740,10 +742,7 @@ function animate() {
     }
 
     const rodTip = new THREE.Vector3(1.2, 4.5, -3)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      )
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y)
       .add(boat.position);
 
     fishingLine.geometry.setFromPoints([
@@ -760,54 +759,15 @@ function animate() {
   // KAMERA
   if (firstPerson) {
     const cameraOffset = new THREE.Vector3(0, 3.1, 0.5)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
     const cameraTarget = boat.position.clone().add(cameraOffset);
-
     camera.position.copy(cameraTarget);
 
     const lookDirection = new THREE.Vector3(0, 2.8, -30)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
     camera.lookAt(
       boat.position.x + lookDirection.x,
       boat.position.y + lookDirection.y,
-      boat.position.z + lookDirection.z
-    );
-  } else {
-    const offset = new THREE.Vector3(0, 8, 15)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
-
-    const targetCamera = boat.position.clone().add(offset);
-
-    camera.position.lerp(targetCamera, 0.1);
-
-    camera.lookAt(
-      boat.position.x,
-      boat.position.y + 1,
-      boat.position.z
-    );
-  }
-
-  renderer.render(scene, camera);
-}
-
-// BAŞLANGIÇ
-updateWheelVisibility();
-animate();
-
-// EKRAN BOYUTU
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+      boat.position
