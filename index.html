@@ -7,92 +7,27 @@
 <title>FISHING WORLD</title>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;
- height:100vh;
- overflow:hidden;
- font-family:Arial,sans-serif;
- color:white;
- background:linear-gradient(180deg,#061b38,#087ca5,#031a32);
- display:flex;
- align-items:center;
- justify-content:center;
-}
-.ocean{
- position:absolute;
- inset:0;
- background:radial-gradient(ellipse at 50% 75%,#13a9c5 0%,#07577c 45%,#061b38 100%);
-}
-.content{
- position:relative;
- text-align:center;
- width:90%;
- max-width:430px;
-}
-.logo{
- font-size:42px;
- font-weight:900;
- letter-spacing:3px;
- text-shadow:0 5px 20px #00cfff;
-}
-.subtitle{
- color:#9deaff;
- letter-spacing:4px;
- font-size:12px;
- margin-top:12px;
-}
-.fish{
- font-size:75px;
- margin:35px 0;
- animation:float 3s infinite ease-in-out;
-}
-@keyframes float{
- 50%{transform:translateY(-15px)}
-}
-button{
- width:100%;
- padding:17px;
- margin-top:12px;
- border:1px solid #56e4ff;
- border-radius:12px;
- background:linear-gradient(90deg,#087ba9,#12b8d5);
- color:white;
- font-size:16px;
- font-weight:bold;
- cursor:pointer;
-}
-button:active{transform:scale(.97)}
-.small{
- background:#102f4b;
- border-color:#477b9a;
-}
-#status{
- margin-top:22px;
- color:#b4eaff;
- font-size:13px;
-}
+body{margin:0;overflow:hidden;background:#061b35;font-family:Arial;color:white}
+canvas{display:block}
+#hud{position:absolute;top:15px;left:15px;right:15px;display:flex;justify-content:space-between;pointer-events:none}
+.panel{background:#06243acc;padding:12px;border-radius:12px}
+#controls{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:12px}
+button{padding:14px 20px;border:1px solid #65ddff;border-radius:12px;background:#087eae;color:white;font-weight:bold}
+#message{position:absolute;top:75px;width:100%;text-align:center;text-shadow:0 2px 5px black}
 </style>
 </head>
 <body>
-<div class="ocean"></div>
-<div class="content">
- <div class="logo">FISHING<br>WORLD</div>
- <div class="subtitle">EXPLORE THE OCEAN</div>
- <div class="fish">🐟</div>
- <button onclick="startGame()">▶ OYUNA BAŞLA</button>
- <button class="small" onclick="showMessage('Tekne garajı hazırlanıyor!')">🚤 TEKNE GARAJI</button>
- <button class="small" onclick="showMessage('Balık koleksiyonu hazırlanıyor!')">🐠 KOLEKSİYON</button>
- <button class="small" onclick="showMessage('Ayarlar hazırlanıyor!')">⚙ AYARLAR</button>
- <div id="status">Okyanusa açılmaya hazır mısın?</div>
+<div id="hud">
+ <div class="panel">🎣 FISHING WORLD</div>
+ <div class="panel">💰 1.000 TL</div>
 </div>
-<script>
-function showMessage(text){
- document.getElementById('status').innerText=text;
-}
-function startGame(){
- document.getElementById('status').innerText=
- 'Macera çok yakında başlıyor!';
-}
-</script>
+<div id="message">Okyanusa hoş geldin!</div>
+<div id="controls">
+ <button id="left">◀</button>
+ <button id="forward">▲ GAZ</button>
+ <button id="right">▶</button>
+ <button id="camera">📷 KAMERA</button>
+</div>
+<script type="module" src="./js/game.js"></script>
 </body>
 </html>
