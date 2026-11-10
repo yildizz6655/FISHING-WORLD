@@ -2,136 +2,252 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>FISHING WORLD</title>
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#061b35;font-family:Arial;color:white}
-canvas{display:block}
-#menu{
- position:absolute;inset:0;z-index:10;
- display:flex;flex-direction:column;
- justify-content:center;align-items:center;gap:13px;
- background:linear-gradient(180deg,#061b35,#087eae);
-}
-#menu h1{color:#65ddff;font-size:32px;letter-spacing:2px}
-.subtitle{color:#b9eaff;font-size:11px;margin-bottom:15px}
-.menu-button{
- width:min(330px,90vw);height:58px;
- border:2px solid #65ddff;border-radius:12px;
- background:#087eae;color:white;
- font-size:17px;font-weight:bold;
-}
-#hud{
- position:absolute;top:12px;left:12px;right:12px;
- display:none;justify-content:space-between;gap:8px;
- pointer-events:none;
-}
-.panel{background:#06243acc;padding:10px;border:1px solid #40cfff;border-radius:12px}
-#message{position:absolute;top:65px;width:100%;text-align:center;text-shadow:0 2px 5px black}
-#controls{position:absolute;bottom:12px;left:12px;right:12px;display:none;justify-content:space-between}
-.control-group{display:flex;gap:7px}
-.control-button{
- min-width:55px;min-height:54px;padding:9px;
- border:1px solid #65ddff;border-radius:12px;
- background:#087eae;color:white;font-weight:bold;
- touch-action:none;
-}
-#speed{display:none;position:absolute;bottom:85px;right:15px;background:#06243acc;padding:10px;border-radius:10px}
-#popup{
- display:none;position:absolute;z-index:20;inset:0;
- background:#000b;align-items:center;justify-content:center;padding:20px;
-}
-#popup-box{
- width:min(330px,90vw);background:#082b48;
- border:2px solid #65ddff;border-radius:16px;
- padding:25px;text-align:center;
-}
-#popup-title{color:#65ddff}
-#popup-close{
- width:100%;height:48px;margin-top:12px;
- border:0;border-radius:10px;background:#087eae;
- color:white;font-weight:bold;font-size:16px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#087fa9">
+  <title>FISHING WORLD</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #86cbed;
+      color: white;
+      touch-action: none;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    button {
+      cursor: pointer;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      border: none;
+    }
+
+    /* BAŞLANGIÇ MENÜSÜ */
+
+    #menu {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background:
+        linear-gradient(180deg, #063653dd, #031526ee);
+    }
+
+    #menu h1 {
+      font-size: 38px;
+      margin-bottom: 8px;
+      text-shadow: 0 4px 12px #000;
+    }
+
+    #menu p {
+      color: #c9eaff;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    #start {
+      padding: 16px 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #21a7e8, #0871b5);
+      box-shadow: 0 5px 0 #064c78;
+      font-size: 19px;
+    }
+
+    #start:active {
+      transform: translateY(4px);
+      box-shadow: none;
+    }
+
+    /* BİLGİ PANELİ */
+
+    #hud {
+      display: none;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      flex-direction: column;
+      gap: 7px;
+      padding: 11px 14px;
+      border: 1px solid #ffffff44;
+      border-radius: 12px;
+      background: #092b42cc;
+      font-size: 14px;
+      font-weight: bold;
+      box-shadow: 0 3px 10px #0005;
+    }
+
+    #speed {
+      display: none;
+      position: fixed;
+      top: 14px;
+      right: 78px;
+      z-index: 10;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #092b42cc;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* MESAJ */
+
+    #message {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 90%;
+      text-align: center;
+      font-size: 15px;
+      font-weight: bold;
+      text-shadow: 0 2px 5px #000;
+      pointer-events: none;
+    }
+
+    /* GAZ VE FREN ALANI */
+
+    #controls {
+      display: none;
+      position: fixed;
+      right: 12px;
+      bottom: 18px;
+      z-index: 20;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    /* OLTA BUTONU */
+
+    #fish {
+      position: fixed;
+      right: 15px;
+      bottom: 140px;
+      z-index: 20;
+      padding: 12px 18px;
+      border: 2px solid #ffffffaa;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #119cc9, #075b8a);
+      font-size: 15px;
+      box-shadow: 0 4px 10px #0006;
+    }
+
+    #fish:active {
+      transform: scale(.94);
+    }
+
+    /* KAMERA */
+
+    #camera {
+      display: none;
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 1000000;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #102c46cc;
+      border: 1px solid #ffffff88;
+      color: white;
+      font-size: 25px;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      box-shadow: 0 4px 12px #0008;
+    }
+
+    #camera:active {
+      transform: scale(.9);
+    }
+
+    @media(max-width: 500px) {
+      #menu h1 {
+        font-size: 30px;
+      }
+
+      #controls {
+        right: 10px;
+        bottom: 18px;
+        gap: 9px;
+      }
+
+      #fish {
+        bottom: 130px;
+      }
+
+      #message {
+        top: 95px;
+        font-size: 13px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="menu">
- <h1>FISHING WORLD</h1>
- <div class="subtitle">EXPLORE THE OCEAN</div>
- <button class="menu-button" id="start">▶ OYUNA BAŞLA</button>
- <button class="menu-button" id="multiplayer">🌐 MULTİPLAYER</button>
- <button class="menu-button" id="settings">⚙️ AYARLAR</button>
- <button class="menu-button" id="garage">🚤 TEKNE GARAJI</button>
-</div>
+  <!-- BAŞLANGIÇ MENÜSÜ -->
+  <div id="menu">
+    <h1>🎣 FISHING WORLD</h1>
+    <p>Denize açıl ve balık tut!</p>
+    <button id="start" onclick="startFishingGame()">
+      OYUNA BAŞLA
+    </button>
+  </div>
 
-<div id="hud">
- <div class="panel">🎣 FISHING WORLD</div>
- <div class="panel">💰 <span id="money">1.000</span> TL</div>
- <div class="panel">🐟 <span id="caught">0</span></div>
-</div>
+  <!-- BİLGİLER -->
+  <div id="hud">
+    <div>💰 Para: <span id="money">1.000</span> TL</div>
+    <div>🐟 Yakalanan: <span id="caught">0</span></div>
+  </div>
 
-<div id="message"></div>
-<div id="speed">HIZ: 0 KM/H</div>
+  <div id="speed">HIZ: 0 KM/H</div>
 
-<div id="controls">
- <div class="control-group">
-  <button class="control-button" id="left">◀</button>
-  <button class="control-button" id="right">▶</button>
- </div>
- <div class="control-group">
-  <button class="control-button" id="brake">FREN</button>
-  <button class="control-button" id="forward">GAZ ▲</button>
-  <button class="control-button" id="fish">🎣 OLTA</button>
-  <button class="control-button" id="camera">📷</button>
- </div>
-</div>
+  <!-- MESAJ -->
+  <div id="message">Fishing World'e hoş geldin!</div>
 
-<div id="popup">
- <div id="popup-box">
-  <h2 id="popup-title">FISHING WORLD</h2>
-  <p id="popup-text"></p>
-  <button id="popup-close">KAPAT</button>
- </div>
-</div>
+  <!-- KAMERA -->
+  <button id="camera" type="button" aria-label="Kamerayı değiştir">
+    📷
+  </button>
 
-<script>
-const menu=document.getElementById('menu');
-const popup=document.getElementById('popup');
+  <!-- OLTA -->
+  <button id="fish" type="button">
+    🎣 OLTA
+  </button>
 
-function showPopup(title,text){
- document.getElementById('popup-title').innerText=title;
- document.getElementById('popup-text').innerText=text;
- popup.style.display='flex';
-}
+  <!-- GAZ VE FREN -->
+  <div id="controls">
+    <button id="brake" type="button">▼<br>FREN</button>
+    <button id="forward" type="button">▲<br>GAZ</button>
+  </div>
 
-document.getElementById('multiplayer').onclick=()=>{
- showPopup('MULTİPLAYER','Yakında sizlerle... 🌊');
-};
+  <!-- OYUN JAVASCRIPT -->
+  <script type="module" src="./js/game.js"></script>
 
-document.getElementById('settings').onclick=()=>{
- showPopup('AYARLAR','Kamera ve tekne kontrollerini oyun içinden değiştirebilirsin.');
-};
-
-document.getElementById('garage').onclick=()=>{
- showPopup('TEKNE GARAJI','Yeni tekneler yakında!');
-};
-
-document.getElementById('popup-close').onclick=()=>{
- popup.style.display='none';
-};
-
-document.getElementById('start').onclick=()=>{
- if(typeof window.startFishingGame==='function'){
-  window.startFishingGame();
- }else{
-  showPopup('YÜKLENİYOR','Oyun motoru yüklenemedi veya henüz hazır değil. js/game.js dosyasını kontrol et.');
- }
-};
-</script>
-
-<script type="module" src="./js/game.js"></script>
 </body>
 </html>
