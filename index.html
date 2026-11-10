@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FISHING WORLD</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ height:100vh;
+ overflow:hidden;
+ font-family:Arial,sans-serif;
+ color:white;
+ background:linear-gradient(180deg,#061b38,#087ca5,#031a32);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+}
+.ocean{
+ position:absolute;
+ inset:0;
+ background:radial-gradient(ellipse at 50% 75%,#13a9c5 0%,#07577c 45%,#061b38 100%);
+}
+.content{
+ position:relative;
+ text-align:center;
+ width:90%;
+ max-width:430px;
+}
+.logo{
+ font-size:42px;
+ font-weight:900;
+ letter-spacing:3px;
+ text-shadow:0 5px 20px #00cfff;
+}
+.subtitle{
+ color:#9deaff;
+ letter-spacing:4px;
+ font-size:12px;
+ margin-top:12px;
+}
+.fish{
+ font-size:75px;
+ margin:35px 0;
+ animation:float 3s infinite ease-in-out;
+}
+@keyframes float{
+ 50%{transform:translateY(-15px)}
+}
+button{
+ width:100%;
+ padding:17px;
+ margin-top:12px;
+ border:1px solid #56e4ff;
+ border-radius:12px;
+ background:linear-gradient(90deg,#087ba9,#12b8d5);
+ color:white;
+ font-size:16px;
+ font-weight:bold;
+ cursor:pointer;
+}
+button:active{transform:scale(.97)}
+.small{
+ background:#102f4b;
+ border-color:#477b9a;
+}
+#status{
+ margin-top:22px;
+ color:#b4eaff;
+ font-size:13px;
+}
+</style>
+</head>
+<body>
+<div class="ocean"></div>
+<div class="content">
+ <div class="logo">FISHING<br>WORLD</div>
+ <div class="subtitle">EXPLORE THE OCEAN</div>
+ <div class="fish">🐟</div>
+ <button onclick="startGame()">▶ OYUNA BAŞLA</button>
+ <button class="small" onclick="showMessage('Tekne garajı hazırlanıyor!')">🚤 TEKNE GARAJI</button>
+ <button class="small" onclick="showMessage('Balık koleksiyonu hazırlanıyor!')">🐠 KOLEKSİYON</button>
+ <button class="small" onclick="showMessage('Ayarlar hazırlanıyor!')">⚙ AYARLAR</button>
+ <div id="status">Okyanusa açılmaya hazır mısın?</div>
+</div>
+<script>
+function showMessage(text){
+ document.getElementById('status').innerText=text;
+}
+function startGame(){
+ document.getElementById('status').innerText=
+ 'Macera çok yakında başlıyor!';
+}
+</script>
+</body>
+</html>
