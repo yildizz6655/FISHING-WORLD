@@ -1,20 +1,16 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-// FISHING WORLD - GRAPHICS UPDATE
+// FISHING WORLD - OPEN OCEAN
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x83c9ed);
-scene.fog = new THREE.Fog(0x83c9ed, 100, 450);
+scene.background = new THREE.Color(0x86cbed);
+scene.fog = new THREE.Fog(0x86cbed, 120, 500);
 
 const camera = new THREE.PerspectiveCamera(
   65, window.innerWidth / window.innerHeight, 0.1, 1000
 );
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  powerPreference: 'high-performance'
-});
-
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
@@ -25,25 +21,24 @@ renderer.toneMappingExposure = 1.15;
 document.body.appendChild(renderer.domElement);
 
 // LIGHTING
-scene.add(new THREE.HemisphereLight(0xbdeaff, 0x31566b, 2));
+scene.add(new THREE.HemisphereLight(0xbdeaff, 0x29485b, 2));
 
 const sun = new THREE.DirectionalLight(0xfff1d0, 3);
-sun.position.set(-80, 120, 60);
+sun.position.set(-70, 100, 50);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -150;
-sun.shadow.camera.right = 150;
-sun.shadow.camera.top = 150;
-sun.shadow.camera.bottom = -150;
+sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.camera.left = -120;
+sun.shadow.camera.right = 120;
+sun.shadow.camera.top = 120;
+sun.shadow.camera.bottom = -120;
 scene.add(sun);
 
-// OCEAN
-const waterGeometry = new THREE.PlaneGeometry(600, 600, 120, 120);
-
+// WATER
+const waterGeometry = new THREE.PlaneGeometry(600, 600, 100, 100);
 const waterMaterial = new THREE.MeshStandardMaterial({
   color: 0x087fa9,
   roughness: 0.22,
-  metalness: 0.32
+  metalness: 0.3
 });
 
 const ocean = new THREE.Mesh(waterGeometry, waterMaterial);
@@ -51,11 +46,11 @@ ocean.rotation.x = -Math.PI / 2;
 ocean.receiveShadow = true;
 scene.add(ocean);
 
-const positions = waterGeometry.attributes.position;
-const originalZ = [];
+const waterPositions = waterGeometry.attributes.position;
+const originalWaterZ = [];
 
-for (let i = 0; i < positions.count; i++) {
-  originalZ.push(positions.getZ(i));
+for (let i = 0; i < waterPositions.count; i++) {
+  originalWaterZ.push(waterPositions.getZ(i));
 }
 
 // SUN
@@ -71,11 +66,11 @@ function createIsland(x, z, size) {
   const island = new THREE.Group();
 
   const sand = new THREE.Mesh(
-    new THREE.CylinderGeometry(size, size * 1.25, 7, 48),
+    new THREE.CylinderGeometry(size, size * 1.3, 7, 48),
     new THREE.MeshStandardMaterial({ color: 0xc9a16b })
   );
   sand.position.y = -2;
-  sand.castShadow = true;
+  sand.receiveShadow = true;
   island.add(sand);
 
   const grass = new THREE.Mesh(
@@ -83,7 +78,6 @@ function createIsland(x, z, size) {
     new THREE.MeshStandardMaterial({ color: 0x38894a })
   );
   grass.position.y = 2;
-  grass.castShadow = true;
   island.add(grass);
 
   const mountain = new THREE.Mesh(
@@ -91,29 +85,26 @@ function createIsland(x, z, size) {
     new THREE.MeshStandardMaterial({ color: 0x657d62 })
   );
   mountain.position.y = size * 0.8;
-  mountain.castShadow = true;
   island.add(mountain);
 
-  // PALM TREES
-  for (let i = 0; i < 5; i++) {
-    const tree = new THREE.Group();
-
+  for (let i = 0; i < 7; i++) {
     const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.35, 0.5, 6, 8),
+      new THREE.CylinderGeometry(0.3, 0.4, 5, 8),
       new THREE.MeshStandardMaterial({ color: 0x80512b })
     );
-    trunk.position.y = 3;
+    const tree = new THREE.Group();
+    trunk.position.y = 2.5;
     tree.add(trunk);
 
     for (let j = 0; j < 5; j++) {
       const leaf = new THREE.Mesh(
-        new THREE.ConeGeometry(1.2, 5, 5),
+        new THREE.ConeGeometry(1.1, 4, 5),
         new THREE.MeshStandardMaterial({ color: 0x176b36 })
       );
       leaf.position.set(
-        Math.cos(j * 1.25) * 1.5,
-        5,
-        Math.sin(j * 1.25) * 1.5
+        Math.cos(j * 1.25) * 1.2,
+        4.5,
+        Math.sin(j * 1.25) * 1.2
       );
       leaf.rotation.z = -Math.PI / 3;
       tree.add(leaf);
@@ -134,86 +125,95 @@ function createIsland(x, z, size) {
 createIsland(-55, -90, 25);
 createIsland(85, -140, 32);
 createIsland(120, 55, 23);
+createIsland(-150, 110, 35);
 
 // BOAT
 const boat = new THREE.Group();
+scene.add(boat);
 
-function boatPart(geometry, color, x, y, z) {
+function makePart(parent, geometry, color, x, y, z) {
   const mesh = new THREE.Mesh(
     geometry,
     new THREE.MeshStandardMaterial({
       color,
-      roughness: 0.55,
+      roughness: 0.5,
       metalness: 0.08
     })
   );
   mesh.position.set(x, y, z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  boat.add(mesh);
+  parent.add(mesh);
   return mesh;
 }
 
 // Hull
-boatPart(new THREE.BoxGeometry(3.5, 1.1, 7.5), 0x713b20, 0, 1, 0);
+makePart(boat, new THREE.BoxGeometry(3.5, 1, 7.5), 0x713b20, 0, 1, 0);
 
 // Deck
-boatPart(new THREE.BoxGeometry(3.1, 0.2, 6.5), 0xd6b17a, 0, 1.65, 0);
+makePart(boat, new THREE.BoxGeometry(3.1, 0.2, 6.5), 0xd6b17a, 0, 1.6, 0);
 
 // Cabin
-boatPart(new THREE.BoxGeometry(2.1, 1.6, 2.2), 0xecece7, 0, 2.5, 0.8);
+makePart(boat, new THREE.BoxGeometry(2.1, 1.6, 2.2), 0xecece7, 0, 2.5, 0.8);
 
 // Roof
-boatPart(new THREE.BoxGeometry(2.5, 0.2, 2.6), 0x164a70, 0, 3.4, 0.8);
+makePart(boat, new THREE.BoxGeometry(2.5, 0.2, 2.6), 0x164a70, 0, 3.4, 0.8);
 
-// Windows
-boatPart(new THREE.BoxGeometry(2.12, 0.65, 0.08), 0x54c5e8, 0, 2.75, -0.32);
-
-// Seats
-for (let i = 0; i < 2; i++) {
-  boatPart(
-    new THREE.BoxGeometry(1.1, 0.35, 0.7),
-    0x9a552c,
-    0,
-    2,
-    -2 + i * 1.5
-  );
-}
+// Window
+makePart(boat, new THREE.BoxGeometry(2.12, 0.65, 0.08), 0x54c5e8, 0, 2.75, -0.32);
 
 // Motor
-boatPart(new THREE.BoxGeometry(0.8, 1.2, 0.8), 0x333b43, 0, 0.8, 4);
+makePart(boat, new THREE.BoxGeometry(0.8, 1.2, 0.8), 0x333b43, 0, 0.8, 4);
 
-// Boat rails
+// Rails
 for (const side of [-1, 1]) {
-  boatPart(
-    new THREE.BoxGeometry(0.12, 0.5, 5.5),
-    0xe4e4e4,
-    side * 1.5,
-    2,
-    0
+  makePart(boat, new THREE.BoxGeometry(0.12, 0.5, 5.5), 0xe4e4e4, side * 1.5, 2, 0);
+}
+
+// FISH
+const fish = [];
+
+function createFish(x, z, color, size) {
+  const group = new THREE.Group();
+
+  makePart(group, new THREE.SphereGeometry(size, 16, 12), color, 0, 0, 0);
+
+  const tail = new THREE.Mesh(
+    new THREE.ConeGeometry(size * 0.7, size * 1.5, 4),
+    new THREE.MeshStandardMaterial({ color })
+  );
+  tail.position.z = size * 1.3;
+  tail.rotation.x = Math.PI / 2;
+  group.add(tail);
+
+  group.position.set(x, -2, z);
+  scene.add(group);
+  fish.push({ group, x, z, phase: Math.random() * 10 });
+}
+
+for (let i = 0; i < 15; i++) {
+  const colors = [0xffaa22, 0xff5555, 0xdddddd, 0x44ccaa];
+  createFish(
+    (Math.random() - 0.5) * 100,
+    (Math.random() - 0.5) * 100,
+    colors[i % colors.length],
+    0.5 + Math.random() * 0.6
   );
 }
 
-scene.add(boat);
-
-// CAMERA AND CONTROLS
+// CONTROLS
 let firstPerson = false;
 let speed = 0;
-
-const keys = {
-  forward: false,
-  left: false,
-  right: false
-};
+const keys = { forward: false, left: false, right: false };
 
 function setControl(id, key) {
   const button = document.getElementById(id);
+  if (!button) return;
 
   button.addEventListener('pointerdown', e => {
     e.preventDefault();
     keys[key] = true;
   });
-
   button.addEventListener('pointerup', () => keys[key] = false);
   button.addEventListener('pointerleave', () => keys[key] = false);
   button.addEventListener('pointercancel', () => keys[key] = false);
@@ -242,7 +242,7 @@ window.addEventListener('keyup', e => {
   if (e.key === 'd' || e.key === 'ArrowRight') keys.right = false;
 });
 
-// GAME LOOP
+// ANIMATION
 const clock = new THREE.Clock();
 
 function animate() {
@@ -251,19 +251,19 @@ function animate() {
   const delta = Math.min(clock.getDelta(), 0.05);
   const time = clock.elapsedTime;
 
-  // WATER ANIMATION
-  for (let i = 0; i < positions.count; i++) {
-    const x = positions.getX(i);
-    const y = positions.getY(i);
+  // WAVES
+  for (let i = 0; i < waterPositions.count; i++) {
+    const x = waterPositions.getX(i);
+    const y = waterPositions.getY(i);
 
     const wave =
       Math.sin(x * 0.08 + time * 1.5) * 0.4 +
       Math.cos(y * 0.07 + time) * 0.3;
 
-    positions.setZ(i, originalZ[i] + wave);
+    waterPositions.setZ(i, originalWaterZ[i] + wave);
   }
 
-  positions.needsUpdate = true;
+  waterPositions.needsUpdate = true;
   waterGeometry.computeVertexNormals();
 
   // BOAT MOVEMENT
@@ -278,10 +278,15 @@ function animate() {
 
   boat.position.x -= Math.sin(boat.rotation.y) * speed * delta;
   boat.position.z -= Math.cos(boat.rotation.y) * speed * delta;
-
   boat.position.y = Math.sin(time * 1.5) * 0.15;
 
-  // CAMERA FOLLOW
+  // FISH MOVEMENT
+  fish.forEach(f => {
+    f.group.position.x = f.x + Math.sin(time + f.phase) * 2;
+    f.group.position.z = f.z + Math.cos(time * 0.7 + f.phase) * 2;
+  });
+
+  // CAMERA
   const offset = firstPerson
     ? new THREE.Vector3(0, 3.5, 0.3)
     : new THREE.Vector3(0, 8, 15);
@@ -290,8 +295,8 @@ function animate() {
     .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
   const targetCamera = boat.position.clone().add(rotatedOffset);
-
   camera.position.lerp(targetCamera, 0.08);
+
   camera.lookAt(
     boat.position.x,
     boat.position.y + (firstPerson ? 2.5 : 1),
