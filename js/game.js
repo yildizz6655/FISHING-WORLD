@@ -1,7 +1,7 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-// FISHING WORLD - OPEN OCEAN
+// FISHING WORLD
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x86cbed);
 scene.fog = new THREE.Fog(0x86cbed, 120, 500);
@@ -14,7 +14,6 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
@@ -26,11 +25,6 @@ scene.add(new THREE.HemisphereLight(0xbdeaff, 0x29485b, 2));
 const sun = new THREE.DirectionalLight(0xfff1d0, 3);
 sun.position.set(-70, 100, 50);
 sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
-sun.shadow.camera.left = -120;
-sun.shadow.camera.right = 120;
-sun.shadow.camera.top = 120;
-sun.shadow.camera.bottom = -120;
 scene.add(sun);
 
 // WATER
@@ -43,7 +37,6 @@ const waterMaterial = new THREE.MeshStandardMaterial({
 
 const ocean = new THREE.Mesh(waterGeometry, waterMaterial);
 ocean.rotation.x = -Math.PI / 2;
-ocean.receiveShadow = true;
 scene.add(ocean);
 
 const waterPositions = waterGeometry.attributes.position;
@@ -70,7 +63,6 @@ function createIsland(x, z, size) {
     new THREE.MeshStandardMaterial({ color: 0xc9a16b })
   );
   sand.position.y = -2;
-  sand.receiveShadow = true;
   island.add(sand);
 
   const grass = new THREE.Mesh(
@@ -88,11 +80,12 @@ function createIsland(x, z, size) {
   island.add(mountain);
 
   for (let i = 0; i < 7; i++) {
+    const tree = new THREE.Group();
+
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.3, 0.4, 5, 8),
       new THREE.MeshStandardMaterial({ color: 0x80512b })
     );
-    const tree = new THREE.Group();
     trunk.position.y = 2.5;
     tree.add(trunk);
 
@@ -147,25 +140,13 @@ function makePart(parent, geometry, color, x, y, z) {
   return mesh;
 }
 
-// Hull
 makePart(boat, new THREE.BoxGeometry(3.5, 1, 7.5), 0x713b20, 0, 1, 0);
-
-// Deck
 makePart(boat, new THREE.BoxGeometry(3.1, 0.2, 6.5), 0xd6b17a, 0, 1.6, 0);
-
-// Cabin
 makePart(boat, new THREE.BoxGeometry(2.1, 1.6, 2.2), 0xecece7, 0, 2.5, 0.8);
-
-// Roof
 makePart(boat, new THREE.BoxGeometry(2.5, 0.2, 2.6), 0x164a70, 0, 3.4, 0.8);
-
-// Window
 makePart(boat, new THREE.BoxGeometry(2.12, 0.65, 0.08), 0x54c5e8, 0, 2.75, -0.32);
-
-// Motor
 makePart(boat, new THREE.BoxGeometry(0.8, 1.2, 0.8), 0x333b43, 0, 0.8, 4);
 
-// Rails
 for (const side of [-1, 1]) {
   makePart(boat, new THREE.BoxGeometry(0.12, 0.5, 5.5), 0xe4e4e4, side * 1.5, 2, 0);
 }
@@ -201,6 +182,85 @@ for (let i = 0; i < 15; i++) {
   );
 }
 
+// FISHING SYSTEM
+let fishingState = 'idle';
+let money = 1000;
+let caughtCount = 0;
+let biteTime = 0;
+let fishingTime = 0;
+
+const bobber = new THREE.Mesh(
+  new THREE.SphereGeometry(0.35, 16, 12),
+  new THREE.MeshStandardMaterial({
+    color: 0xff3333,
+    roughness: 0.3
+  })
+);
+bobber.visible = false;
+scene.add(bobber);
+
+const lineGeometry = new THREE.BufferGeometry();
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+const fishingLine = new THREE.Line(lineGeometry, lineMaterial);
+fishingLine.visible = false;
+scene.add(fishingLine);
+
+const rod = makePart(
+  boat,
+  new THREE.CylinderGeometry(0.07, 0.1, 4, 8),
+  0x5b321b,
+  1.2, 2.7, -2
+);
+rod.rotation.x = Math.PI / 3;
+rod.rotation.z = -0.25;
+
+function updateFishingButton() {
+  const button = document.getElementById('fish');
+  if (fishingState === 'idle') button.innerText = '🎣 OLTA';
+  if (fishingState === 'casting') button.innerText = 'BEKLE...';
+  if (fishingState === 'bite') button.innerText = '🪝 ÇEK!';
+}
+
+function fishingAction() {
+  const message = document.getElementById('message');
+
+  if (fishingState === 'idle') {
+    fishingState = 'casting';
+    fishingTime = 0;
+    bobber.visible = true;
+    fishingLine.visible = true;
+    message.innerText = '🎣 Oltanı attın! Balık bekleniyor...';
+    updateFishingButton();
+    return;
+  }
+
+  if (fishingState === 'bite') {
+    const reward = Math.floor(50 + Math.random() * 101);
+    money += reward;
+    caughtCount++;
+
+    document.getElementById('money').innerText =
+      money.toLocaleString('tr-TR');
+
+    document.getElementById('caught').innerText = caughtCount;
+
+    message.innerText =
+      '🐟 Balığı yakaladın! +' + reward + ' TL kazandın!';
+
+    fishingState = 'idle';
+    bobber.visible = false;
+    fishingLine.visible = false;
+    updateFishingButton();
+    return;
+  }
+
+  if (fishingState === 'casting') {
+    message.innerText = '🐟 Sabret! Balığın gelmesini bekle.';
+  }
+}
+
+document.getElementById('fish').addEventListener('click', fishingAction);
+
 // CONTROLS
 let firstPerson = false;
 let speed = 0;
@@ -214,6 +274,7 @@ function setControl(id, key) {
     e.preventDefault();
     keys[key] = true;
   });
+
   button.addEventListener('pointerup', () => keys[key] = false);
   button.addEventListener('pointerleave', () => keys[key] = false);
   button.addEventListener('pointercancel', () => keys[key] = false);
@@ -285,6 +346,53 @@ function animate() {
     f.group.position.x = f.x + Math.sin(time + f.phase) * 2;
     f.group.position.z = f.z + Math.cos(time * 0.7 + f.phase) * 2;
   });
+
+  // FISHING TIMER
+  if (fishingState === 'casting') {
+    fishingTime += delta;
+
+    if (fishingTime > 5) {
+      fishingState = 'bite';
+      biteTime = time;
+      document.getElementById('message').innerText =
+        '‼️ BALIK OLTAYA TAKILDI! Hemen ÇEK!';
+      updateFishingButton();
+    }
+  }
+
+  // BOBBER POSITION
+  const bobberOffset = new THREE.Vector3(1.2, 0, -13)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
+
+  const bobberPosition = boat.position.clone().add(bobberOffset);
+
+  if (fishingState !== 'idle') {
+    bobber.position.set(
+      bobberPosition.x,
+      0.3 + Math.sin(time * 4) * 0.15,
+      bobberPosition.z
+    );
+
+    if (fishingState === 'bite') {
+      bobber.position.y += Math.sin(time * 12) * 0.25;
+    }
+
+    const rodTip = new THREE.Vector3(1.2, 4.5, -3)
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y)
+      .add(boat.position);
+
+    const points = [
+      rodTip,
+      new THREE.Vector3(
+        (rodTip.x + bobber.position.x) / 2,
+        1.5,
+        (rodTip.z + bobber.position.z) / 2
+      ),
+      bobber.position
+    ];
+
+    fishingLine.geometry.setFromPoints(points);
+  }
 
   // CAMERA
   const offset = firstPerson
