@@ -9,9 +9,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x86cbed);
 scene.fog = new THREE.Fog(0x86cbed, 120, 500);
 
-const camera = new THREE.PerspectiveCamera(
-  65, window.innerWidth / window.innerHeight, 0.1, 1000
-);
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
@@ -40,16 +38,10 @@ let caughtCount = 0;
 let fishingState = 'idle';
 let fishingTime = 0;
 
-window.startFishingGame = function () {
-  gameStarted = true;
-  menu.style.display = 'none';
-  hud.style.display = 'flex';
-  controls.style.display = 'flex';
-  speedDisplay.style.display = 'block';
-  message.innerText = 'Okyanusa hoş geldin!';
-};
-
+// =====================================
 // IŞIKLAR
+// =====================================
+
 scene.add(new THREE.HemisphereLight(0xbdeaff, 0x29485b, 2));
 
 const sun = new THREE.DirectionalLight(0xfff1d0, 2.5);
@@ -99,43 +91,24 @@ const sunMesh = new THREE.Mesh(
 sunMesh.position.set(-100, 90, -180);
 scene.add(sunMesh);
 
+// =====================================
 // ADALAR
+// =====================================
+
 function createIsland(x, z, size) {
   const island = new THREE.Group();
 
-  makePart(
-    island,
-    new THREE.CylinderGeometry(size, size * 1.3, 7, 32),
-    0xc9a16b, 0, -2, 0
-  );
-
-  makePart(
-    island,
-    new THREE.CylinderGeometry(size * 0.95, size, 3, 32),
-    0x38894a, 0, 2, 0
-  );
-
-  makePart(
-    island,
-    new THREE.ConeGeometry(size * 0.5, size * 1.5, 10),
-    0x657d62, 0, size * 0.8, 0
-  );
+  makePart(island, new THREE.CylinderGeometry(size, size * 1.3, 7, 32), 0xc9a16b, 0, -2, 0);
+  makePart(island, new THREE.CylinderGeometry(size * 0.95, size, 3, 32), 0x38894a, 0, 2, 0);
+  makePart(island, new THREE.ConeGeometry(size * 0.5, size * 1.5, 10), 0x657d62, 0, size * 0.8, 0);
 
   for (let i = 0; i < 7; i++) {
     const tree = new THREE.Group();
 
-    makePart(
-      tree,
-      new THREE.CylinderGeometry(0.3, 0.4, 5, 8),
-      0x80512b, 0, 2.5, 0
-    );
+    makePart(tree, new THREE.CylinderGeometry(0.3, 0.4, 5, 8), 0x80512b, 0, 2.5, 0);
 
     for (let j = 0; j < 3; j++) {
-      makePart(
-        tree,
-        new THREE.ConeGeometry(1.4, 3.5, 6),
-        0x176b36, 0, 4 + j * 1.2, 0
-      );
+      makePart(tree, new THREE.ConeGeometry(1.4, 3.5, 6), 0x176b36, 0, 4 + j * 1.2, 0);
     }
 
     tree.position.set(
@@ -156,7 +129,10 @@ createIsland(85, -140, 32);
 createIsland(120, 55, 23);
 createIsland(-150, 110, 35);
 
+// =====================================
 // TEKNE
+// =====================================
+
 const boat = new THREE.Group();
 scene.add(boat);
 
@@ -168,11 +144,7 @@ makePart(boat, new THREE.BoxGeometry(2.12, 0.65, 0.08), 0x54c5e8, 0, 2.75, -0.32
 makePart(boat, new THREE.BoxGeometry(0.8, 1.2, 0.8), 0x333b43, 0, 0.8, 4);
 
 for (const side of [-1, 1]) {
-  makePart(
-    boat,
-    new THREE.BoxGeometry(0.12, 0.5, 5.5),
-    0xe4e4e4, side * 1.5, 2, 0
-  );
+  makePart(boat, new THREE.BoxGeometry(0.12, 0.5, 5.5), 0xe4e4e4, side * 1.5, 2, 0);
 }
 
 // MOTOR VE PERVANE
@@ -187,32 +159,22 @@ propeller.position.set(0, -0.6, 0.2);
 motor.add(propeller);
 
 for (let i = 0; i < 3; i++) {
-  const blade = makePart(
-    propeller,
-    new THREE.BoxGeometry(0.12, 0.9, 0.08),
-    0xaaaaaa, 0, 0.45, 0
-  );
+  const blade = makePart(propeller, new THREE.BoxGeometry(0.12, 0.9, 0.08), 0xaaaaaa, 0, 0.45, 0);
   blade.rotation.z = i * Math.PI * 2 / 3;
 }
 
+// =====================================
 // BALIKLAR
+// =====================================
+
 const fish = [];
 
 function createFish(x, z, color, size) {
   const group = new THREE.Group();
 
-  makePart(
-    group,
-    new THREE.SphereGeometry(size, 12, 10),
-    color, 0, 0, 0
-  );
+  makePart(group, new THREE.SphereGeometry(size, 12, 10), color, 0, 0, 0);
 
-  const tail = makePart(
-    group,
-    new THREE.ConeGeometry(size * 0.7, size * 1.5, 4),
-    color, 0, 0, size * 1.3
-  );
-
+  const tail = makePart(group, new THREE.ConeGeometry(size * 0.7, size * 1.5, 4), color, 0, 0, size * 1.3);
   tail.rotation.x = Math.PI / 2;
 
   group.position.set(x, -2, z);
@@ -223,13 +185,7 @@ function createFish(x, z, color, size) {
 
 for (let i = 0; i < 15; i++) {
   const colors = [0xffaa22, 0xff5555, 0xdddddd, 0x44ccaa];
-
-  createFish(
-    (Math.random() - 0.5) * 100,
-    (Math.random() - 0.5) * 100,
-    colors[i % colors.length],
-    0.5 + Math.random() * 0.6
-  );
+  createFish((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, colors[i % colors.length], 0.5 + Math.random() * 0.6);
 }
 
 // =====================================
@@ -237,8 +193,8 @@ for (let i = 0; i < 15; i++) {
 // =====================================
 
 const wheel = document.createElement('div');
-
 wheel.id = 'steering-wheel';
+
 wheel.innerHTML = `
   <div class="wheel-ring">
     <div class="wheel-spoke wheel-top"></div>
@@ -254,56 +210,78 @@ const wheelStyle = document.createElement('style');
 
 wheelStyle.textContent = `
 #steering-wheel {
-  display:none;
-  position:absolute;
-  z-index:15;
-  left:25px;
-  bottom:25px;
-  width:145px;
-  height:145px;
-  touch-action:none;
-  user-select:none;
+  display: none;
+  position: fixed !important;
+  z-index: 999999 !important;
+  left: 20px;
+  bottom: 22px;
+  width: 145px;
+  height: 145px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
 }
+
 .wheel-ring {
-  position:absolute;
-  inset:5px;
-  border:11px solid #b9c6d0;
-  border-radius:50%;
-  background:radial-gradient(circle,#273b4b 0%,#111b25 70%);
-  box-shadow:0 4px 15px #000b,inset 0 0 8px #fff5;
-  transform-origin:center;
+  position: absolute;
+  inset: 5px;
+  border: 11px solid #b9c6d0;
+  border-radius: 50%;
+  background: radial-gradient(circle,#273b4b 0%,#111b25 70%);
+  box-shadow: 0 4px 15px #000b,inset 0 0 8px #fff5;
+  transform-origin: center;
 }
+
 .wheel-spoke {
-  position:absolute;
-  background:linear-gradient(90deg,#8b9ba8,#e2e8ed,#647582);
-  border-radius:8px;
+  position: absolute;
+  background: linear-gradient(90deg,#8b9ba8,#e2e8ed,#647582);
+  border-radius: 8px;
 }
+
 .wheel-top {
-  width:10px;height:54px;
-  left:50%;top:0;
-  transform:translateX(-50%);
+  width: 10px;
+  height: 54px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
 }
+
 .wheel-left {
-  width:10px;height:53px;
-  left:24px;top:34px;
-  transform:rotate(-55deg);
+  width: 10px;
+  height: 53px;
+  left: 24px;
+  top: 34px;
+  transform: rotate(-55deg);
 }
+
 .wheel-right {
-  width:10px;height:53px;
-  right:24px;top:34px;
-  transform:rotate(55deg);
+  width: 10px;
+  height: 53px;
+  right: 24px;
+  top: 34px;
+  transform: rotate(55deg);
 }
+
 .wheel-center {
-  position:absolute;
-  width:35px;height:35px;
-  left:50%;top:50%;
-  transform:translate(-50%,-50%);
-  background:radial-gradient(circle,#dce4ea,#536574);
-  border:3px solid #182c3b;
-  border-radius:50%;
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(circle,#dce4ea,#536574);
+  border: 3px solid #182c3b;
+  border-radius: 50%;
 }
+
 @media (max-width:500px) {
-  #steering-wheel {width:125px;height:125px;left:14px;bottom:18px}
+  #steering-wheel {
+    width: 125px;
+    height: 125px;
+    left: 14px;
+    bottom: 18px;
+  }
 }
 `;
 
@@ -317,61 +295,47 @@ let draggingWheel = false;
 let previousPointerAngle = 0;
 
 function updateWheelVisibility() {
-  wheel.style.display =
-    gameStarted && firstPerson ? 'block' : 'none';
+  wheel.style.display = gameStarted && firstPerson ? 'block' : 'none';
 
   const leftButton = document.getElementById('left');
   const rightButton = document.getElementById('right');
 
-  if (leftButton) {
-    leftButton.style.display = firstPerson ? 'none' : '';
-  }
-
-  if (rightButton) {
-    rightButton.style.display = firstPerson ? 'none' : '';
-  }
+  if (leftButton) leftButton.style.display = 'none';
+  if (rightButton) rightButton.style.display = 'none';
 }
 
 function pointerAngle(event) {
   const rect = wheel.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
 
   return Math.atan2(
-    event.clientY - centerY,
-    event.clientX - centerX
+    event.clientY - (rect.top + rect.height / 2),
+    event.clientX - (rect.left + rect.width / 2)
   );
 }
 
 wheel.addEventListener('pointerdown', event => {
   event.preventDefault();
-
   draggingWheel = true;
   previousPointerAngle = pointerAngle(event);
-
   wheel.setPointerCapture(event.pointerId);
 });
 
 wheel.addEventListener('pointermove', event => {
   if (!draggingWheel) return;
-
   event.preventDefault();
 
-  let currentAngle = pointerAngle(event);
+  const currentAngle = pointerAngle(event);
   let difference = currentAngle - previousPointerAngle;
 
   if (difference > Math.PI) difference -= Math.PI * 2;
   if (difference < -Math.PI) difference += Math.PI * 2;
 
   previousPointerAngle = currentAngle;
-
   wheelAngle += difference;
   wheelAngle = THREE.MathUtils.clamp(wheelAngle, -1.2, 1.2);
-
   steeringValue = wheelAngle / 1.2;
 
-  wheelRing.style.transform =
-    `rotate(${wheelAngle * 100}deg)`;
+  wheelRing.style.transform = `rotate(${wheelAngle * 100}deg)`;
 });
 
 function releaseWheel() {
@@ -413,14 +377,81 @@ function setControl(id, key) {
 }
 
 setControl('forward', 'forward');
-setControl('left', 'left');
-setControl('right', 'right');
 setControl('brake', 'brake');
+
+// =====================================
+// GAZ VE FREN PEDALI GÖRÜNÜMÜ
+// =====================================
+
+const pedalStyle = document.createElement('style');
+
+pedalStyle.textContent = `
+#forward, #brake {
+  width: 76px !important;
+  height: 108px !important;
+  min-width: 76px !important;
+  border: 3px solid #dce5eb !important;
+  border-radius: 16px 16px 22px 22px !important;
+  color: white !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 3px #000 !important;
+  box-shadow: 0 7px 0 #26343d, 0 9px 13px #0009 !important;
+  touch-action: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  transform: perspective(150px) rotateX(7deg);
+}
+
+#forward {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 10px,
+      #ffffff35 11px,
+      #ffffff35 14px
+    ),
+    linear-gradient(135deg,#268d45,#145b2d) !important;
+}
+
+#brake {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 10px,
+      #ffffff35 11px,
+      #ffffff35 14px
+    ),
+    linear-gradient(135deg,#df4545,#8d1717) !important;
+}
+
+#forward:active, #brake:active {
+  transform: perspective(150px) rotateX(7deg) translateY(5px);
+  box-shadow: 0 2px 0 #26343d, 0 4px 8px #0009 !important;
+}
+
+@media(max-width:500px) {
+  #forward, #brake {
+    width: 65px !important;
+    height: 95px !important;
+    min-width: 65px !important;
+  }
+}
+`;
+
+document.head.appendChild(pedalStyle);
+
+document.getElementById('forward').innerHTML = '▲<br>GAZ';
+document.getElementById('brake').innerHTML = '▼<br>FREN';
 
 // KAMERA
 document.getElementById('camera').onclick = () => {
   firstPerson = !firstPerson;
-
   updateWheelVisibility();
 
   message.innerText = firstPerson
@@ -502,9 +533,7 @@ function fishingAction() {
     money += reward;
     caughtCount++;
 
-    document.getElementById('money').innerText =
-      money.toLocaleString('tr-TR');
-
+    document.getElementById('money').innerText = money.toLocaleString('tr-TR');
     document.getElementById('caught').innerText = caughtCount;
 
     message.innerText = 'Balığı yakaladın! +' + reward + ' TL!';
@@ -520,6 +549,22 @@ function fishingAction() {
 }
 
 document.getElementById('fish').onclick = fishingAction;
+
+// =====================================
+// OYUNA BAŞLA
+// =====================================
+
+window.startFishingGame = function () {
+  gameStarted = true;
+
+  menu.style.display = 'none';
+  hud.style.display = 'flex';
+  controls.style.display = 'flex';
+  speedDisplay.style.display = 'block';
+
+  message.innerText = 'Okyanusa hoş geldin!';
+  updateWheelVisibility();
+};
 
 // =====================================
 // ANİMASYON
@@ -548,8 +593,8 @@ function animate() {
   waterPositions.needsUpdate = true;
   waterGeometry.computeVertexNormals();
 
-  // GAZ VE FREN
   if (gameStarted) {
+    // GAZ VE FREN
     if (keys.forward && !keys.brake) {
       speed = Math.min(speed + delta * 8, 30);
     } else if (keys.brake) {
@@ -558,13 +603,12 @@ function animate() {
       speed *= Math.pow(0.985, delta * 60);
     }
 
-    // DİREKSİYON HESABI
-    let steering = firstPerson
+    // DİREKSİYON
+    const steering = firstPerson
       ? steeringValue
-      : (Number(keys.left) - Number(keys.right));
+      : Number(keys.left) - Number(keys.right);
 
-    boat.rotation.y += delta * steering * 1.3 *
-      Math.max(0.15, speed / 12);
+    boat.rotation.y += delta * steering * 1.3 * Math.max(0.15, speed / 12);
 
     // TEKNE HAREKETİ
     boat.position.x -= Math.sin(boat.rotation.y) * speed * delta;
@@ -573,32 +617,26 @@ function animate() {
     boat.position.y = Math.sin(time * 1.5) * 0.15;
     boat.rotation.z = Math.sin(time * 1.5) * 0.015;
 
-    // MOTOR PERVANESİ
+    // MOTOR
     propeller.rotation.z += delta * speed * 2;
 
-    // DİREKSİYONU BIRAKINCA ORTALA
+    // DİREKSİYONUN OTOMATİK ORTALANMASI
     if (!draggingWheel) {
       wheelAngle *= Math.pow(0.08, delta);
       steeringValue = wheelAngle / 1.2;
-
-      wheelRing.style.transform =
-        `rotate(${wheelAngle * 100}deg)`;
+      wheelRing.style.transform = `rotate(${wheelAngle * 100}deg)`;
     }
   }
 
-  speedDisplay.innerText =
-    'HIZ: ' + Math.round(speed * 4) + ' KM/H';
+  speedDisplay.innerText = 'HIZ: ' + Math.round(speed * 4) + ' KM/H';
 
-  // BALIKLAR
+  // BALIK HAREKETLERİ
   fish.forEach(f => {
-    f.group.position.x =
-      f.x + Math.sin(time + f.phase) * 2;
-
-    f.group.position.z =
-      f.z + Math.cos(time * 0.7 + f.phase) * 2;
+    f.group.position.x = f.x + Math.sin(time + f.phase) * 2;
+    f.group.position.z = f.z + Math.cos(time * 0.7 + f.phase) * 2;
   });
 
-  // OLTA BEKLEME
+  // OLTA ZAMANLAYICISI
   if (fishingState === 'casting' && gameStarted) {
     fishingTime += delta;
 
@@ -609,13 +647,10 @@ function animate() {
     }
   }
 
-  // ŞAMANDIRA
+  // ŞAMANDIRA VE OLTA İPİ
   if (fishingState !== 'idle') {
     const bobberOffset = new THREE.Vector3(1.2, 0, -13)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
     const bobberPosition = boat.position.clone().add(bobberOffset);
 
@@ -630,10 +665,7 @@ function animate() {
     }
 
     const rodTip = new THREE.Vector3(1.2, 4.5, -3)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      )
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y)
       .add(boat.position);
 
     fishingLine.geometry.setFromPoints([
@@ -650,20 +682,13 @@ function animate() {
   // KAMERA
   if (firstPerson) {
     const cameraOffset = new THREE.Vector3(0, 3.1, 0.5)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
     const cameraTarget = boat.position.clone().add(cameraOffset);
-
-    camera.position.lerp(cameraTarget, 0.2);
+    camera.position.copy(cameraTarget);
 
     const lookDirection = new THREE.Vector3(0, 2.8, -30)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
     camera.lookAt(
       boat.position.x + lookDirection.x,
@@ -672,25 +697,18 @@ function animate() {
     );
   } else {
     const offset = new THREE.Vector3(0, 8, 15)
-      .applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        boat.rotation.y
-      );
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), boat.rotation.y);
 
     const targetCamera = boat.position.clone().add(offset);
-
     camera.position.lerp(targetCamera, 0.1);
 
-    camera.lookAt(
-      boat.position.x,
-      boat.position.y + 1,
-      boat.position.z
-    );
+    camera.lookAt(boat.position.x, boat.position.y + 1, boat.position.z);
   }
 
   renderer.render(scene, camera);
 }
 
+// BAŞLANGIÇ
 updateWheelVisibility();
 animate();
 
@@ -700,4 +718,4 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-                                       
+  
