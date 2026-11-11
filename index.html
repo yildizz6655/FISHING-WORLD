@@ -2,153 +2,48 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FISHING WORLD</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #061b2c;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    canvas {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    #menu {
-      position: fixed;
-      inset: 0;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(160deg,#061b2c,#087caa);
-      text-align: center;
-      padding: 20px;
-    }
-    #menu h1 {
-      font-size: 42px;
-      margin-bottom: 8px;
-      letter-spacing: 3px;
-    }
-    #menu p { color: #c8eaff; }
-    button {
-      border: 0;
-      border-radius: 14px;
-      padding: 14px 22px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      color: white;
-      background: #079bd2;
-    }
-    #start { margin-top: 25px; min-width: 210px; }
-    #hud {
-      display: none;
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      z-index: 5;
-      background: #001b2dcc;
-      padding: 12px;
-      border-radius: 12px;
-      line-height: 1.8;
-    }
-    #camera {
-      display: none;
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      z-index: 6;
-      border-radius: 50%;
-      width: 52px;
-      height: 52px;
-      padding: 0;
-      font-size: 23px;
-    }
-    #controls {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 0;
-      right: 0;
-      z-index: 6;
-      justify-content: space-between;
-      align-items: end;
-      padding: 0 20px;
-      pointer-events: none;
-    }
-    #controls button { pointer-events: auto; }
-    #wheel {
-      width: 95px;
-      height: 95px;
-      border: 8px solid #dcecf5;
-      border-radius: 50%;
-      background: #123b53cc;
-      font-size: 30px;
-      touch-action: none;
-    }
-    .pedals { display: flex; gap: 10px; }
-    .pedals button {
-      height: 65px;
-      min-width: 65px;
-      background: #087ca8;
-    }
-    #fish {
-      display: none;
-      position: fixed;
-      bottom: 115px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 7;
-    }
-    #message {
-      display: none;
-      position: fixed;
-      top: 25%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #001b2dcc;
-      padding: 14px 20px;
-      border-radius: 12px;
-      z-index: 8;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishingWorld</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div id="menu">
-    <h1>🎣 FISHING WORLD</h1>
-    <p>Denize açıl, balıklarını yakala ve para kazan!</p>
-    <p>🌊 Açık deniz • 🚤 Tekne • 🐟 Balık avı</p>
-    <button id="start">OYUNA BAŞLA</button>
-  </div>
+    <div id="game-container">
+        <div id="loading-screen">
+            <h1>🎣 FISHING WORLD</h1>
+            <p>Balıkçılık macerasına hazırlan!</p>
+            <button id="start-game">OYUNA BAŞLA</button>
+        </div>
 
-  <div id="hud">
-    💰 Para: <span id="money">1000</span> TL<br>
-    🐟 Yakalanan: <span id="caught">0</span>
-  </div>
+        <div id="game-ui">
+            <div class="top-bar">
+                <h2>🎣 FishingWorld</h2>
+                <span id="money">💰 0 TL</span>
+            </div>
 
-  <button id="camera">📷</button>
+            <div id="boat-info">
+                <span>🚤 TEKNE</span>
+                <span id="speed">0 KM/H</span>
+            </div>
 
-  <div id="controls">
-    <button id="wheel">↗</button>
-    <div class="pedals">
-      <button id="brake">FREN</button>
-      <button id="forward">GAZ</button>
+            <div id="controls">
+                <div id="steering-area">
+                    <div id="steering-wheel">◉</div>
+                    <p>DİREKSİYON</p>
+                </div>
+
+                <div id="throttle-area">
+                    <div id="throttle">
+                        <div id="throttle-handle"></div>
+                    </div>
+                    <p>GAZ / GERİ</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <button id="fish">🎣 BALIK TUT</button>
-  <div id="message"></div>
-
-  <script type="module" src="./js/game.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
