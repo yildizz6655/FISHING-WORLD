@@ -1,55 +1,79 @@
 
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
-// FISHING WORLD
+// =====================================
+// FISHING WORLD - GAME ENGINE
+// =====================================
+
+const canvas = document.getElementById("gameCanvas");
+
+if (!canvas) {
+  throw new Error("gameCanvas bulunamadı. index.html dosyasını kontrol et.");
+}
+
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
-scene.fog = new THREE.Fog(0x87ceeb, 80, 350);
+scene.background = new THREE.Color(0x78bde5);
+scene.fog = new THREE.Fog(0x78bde5, 100, 450);
 
 const camera = new THREE.PerspectiveCamera(
   65,
-  window.innerWidth / window.innerHeight,
+  innerWidth / innerHeight,
   0.1,
   1000
 );
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
-
-// Işıklar
-scene.add(new THREE.HemisphereLight(0xffffff, 0x426477, 2));
-
-const sun = new THREE.DirectionalLight(0xffffff, 2);
-sun.position.set(50, 100, 40);
-sun.castShadow = true;
-scene.add(sun);
-
-// Deniz
-const oceanGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-const oceanMaterial = new THREE.MeshStandardMaterial({
-  color: 0x087da8,
-  roughness: 0.35,
-  metalness: 0.15
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: true,
+  powerPreference: "high-performance"
 });
 
-const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+
+// =====================================
+// LIGHTING
+// =====================================
+
+scene.add(new THREE.HemisphereLight(0xbdeaff, 0x35556b, 2));
+
+const sunlight = new THREE.DirectionalLight(0xffffff, 2.2);
+sunlight.position.set(-40, 100, 50);
+sunlight.castShadow = true;
+scene.add(sunlight);
+
+// =====================================
+// OCEAN
+// =====================================
+
+const ocean = new THREE.Mesh(
+  new THREE.PlaneGeometry(1500, 1500, 100, 100),
+  new THREE.MeshStandardMaterial({
+    color: 0x087eaf,
+    roughness: 0.3,
+    metalness: 0.18
+  })
+);
+
 ocean.rotation.x = -Math.PI / 2;
-ocean.position.y = 0;
-ocean.receiveShadow = true;
+ocean.position.y = -0.2;
 scene.add(ocean);
 
-// Tekne
+// =====================================
+// BOAT
+// =====================================
+
 const boat = new THREE.Group();
 scene.add(boat);
 
-function createPart(geometry, color, x, y, z) {
-  const mesh = new THREE.Mesh(
-    geometry,
-    new THREE.MeshStandardMaterial({ color })
-  );
+function boatPart(geometry, color, x, y, z) {
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.55
+  });
+
+  const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -57,89 +81,89 @@ function createPart(geometry, color, x, y, z) {
   return mesh;
 }
 
-// Tekne gövdesi
-createPart(
-  new THREE.BoxGeometry(3, 0.7, 7),
-  0xeeeeee, 0, 0.8, 0
+// Gövde
+boatPart(
+  new THREE.BoxGeometry(3.2, 0.65, 7),
+  0xe7e7e7, 0, 0.7, 0
 );
 
 // Alt gövde
-createPart(
-  new THREE.BoxGeometry(2.6, 0.45, 6.5),
-  0x174a68, 0, 0.45, 0
+boatPart(
+  new THREE.BoxGeometry(2.8, 0.5, 6.5),
+  0x174b6b, 0, 0.35, 0
 );
 
 // Ön burun
-createPart(
-  new THREE.ConeGeometry(1.5, 2, 4),
-  0xeeeeee, 0, 0.8, -4
-).rotation.x = -Math.PI / 2;
+const bow = boatPart(
+  new THREE.ConeGeometry(1.6, 2.3, 4),
+  0xe7e7e7, 0, 0.7, -4
+);
+bow.rotation.x = -Math.PI / 2;
+
+// İç bölüm
+boatPart(
+  new THREE.BoxGeometry(2.2, 0.3, 3.2),
+  0x9aa9b0, 0, 1.05, 0.2
+);
 
 // Koltuk
-createPart(
+boatPart(
   new THREE.BoxGeometry(1.8, 0.7, 1),
-  0x263b48, 0, 1.45, 0.5
+  0x263c4b, 0, 1.4, 0.8
 );
 
 // Motor
-createPart(
-  new THREE.BoxGeometry(0.8, 1.2, 0.8),
-  0x333333, 0, 0.7, 3.8
+boatPart(
+  new THREE.BoxGeometry(0.9, 1.3, 0.9),
+  0x242a30, 0, 0.8, 3.7
 );
 
-// Motor üstü
-createPart(
-  new THREE.BoxGeometry(0.9, 0.5, 0.9),
-  0x1685bb, 0, 1.5, 3.8
+// Motor kapağı
+boatPart(
+  new THREE.BoxGeometry(1, 0.5, 1),
+  0x087dbb, 0, 1.5, 3.7
 );
 
-// Direksiyon
-const steeringWheel = new THREE.Group();
-const wheelRing = new THREE.Mesh(
-  new THREE.TorusGeometry(0.35, 0.055, 8, 24),
-  new THREE.MeshStandardMaterial({ color: 0x222222 })
-);
-steeringWheel.add(wheelRing);
-steeringWheel.position.set(0, 1.9, 0.5);
-boat.add(steeringWheel);
+// =====================================
+// ISLANDS
+// =====================================
 
-// Adalar
 function createIsland(x, z, size) {
   const island = new THREE.Group();
 
-  const land = new THREE.Mesh(
+  const sand = new THREE.Mesh(
     new THREE.CylinderGeometry(size * 0.7, size, 3, 32),
-    new THREE.MeshStandardMaterial({ color: 0xd5bd82 })
+    new THREE.MeshStandardMaterial({ color: 0xd5bd88 })
   );
-  land.position.y = 1;
-  island.add(land);
+  sand.position.y = 0.5;
+  island.add(sand);
 
   const grass = new THREE.Mesh(
-    new THREE.CylinderGeometry(size * 0.65, size * 0.8, 1, 32),
-    new THREE.MeshStandardMaterial({ color: 0x39834b })
+    new THREE.CylinderGeometry(size * 0.65, size * 0.75, 1, 32),
+    new THREE.MeshStandardMaterial({ color: 0x398b45 })
   );
-  grass.position.y = 2.5;
+  grass.position.y = 2.4;
   island.add(grass);
 
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 10; i++) {
     const tree = new THREE.Group();
 
     const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.15, 0.2, 2, 8),
+      new THREE.CylinderGeometry(0.15, 0.22, 2, 8),
       new THREE.MeshStandardMaterial({ color: 0x79502b })
     );
     trunk.position.y = 1;
     tree.add(trunk);
 
     const leaves = new THREE.Mesh(
-      new THREE.ConeGeometry(1, 2.5, 8),
-      new THREE.MeshStandardMaterial({ color: 0x17652d })
+      new THREE.ConeGeometry(1.1, 2.7, 8),
+      new THREE.MeshStandardMaterial({ color: 0x17642e })
     );
     leaves.position.y = 2.8;
     tree.add(leaves);
 
     const angle = Math.random() * Math.PI * 2;
-    const distance = Math.random() * size * 0.45;
+    const distance = Math.random() * size * 0.4;
 
     tree.position.set(
       Math.cos(angle) * distance,
@@ -154,28 +178,33 @@ function createIsland(x, z, size) {
   scene.add(island);
 }
 
-createIsland(-35, -45, 15);
-createIsland(50, -85, 22);
-createIsland(-80, 75, 18);
-createIsland(90, 65, 25);
+createIsland(-45, -55, 18);
+createIsland(65, -100, 25);
+createIsland(-100, 85, 22);
+createIsland(110, 70, 27);
 
-// Balıklar
+// =====================================
+// FISH
+// =====================================
+
 const fishList = [];
 
 for (let i = 0; i < 15; i++) {
   const fish = new THREE.Group();
 
-  const colors = [
-    0xffcc33, 0xff5555, 0x55ccff,
-    0xff88cc, 0xeeeeee
-  ];
-
-  const color = colors[i % colors.length];
+  const color = [
+    0xffcc33,
+    0xff5555,
+    0x55ccff,
+    0xff88cc,
+    0xffffff
+  ][i % 5];
 
   const body = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 12, 10),
+    new THREE.SphereGeometry(0.5, 16, 12),
     new THREE.MeshStandardMaterial({ color })
   );
+
   body.scale.set(1.5, 0.7, 0.7);
   fish.add(body);
 
@@ -183,191 +212,245 @@ for (let i = 0; i < 15; i++) {
     new THREE.ConeGeometry(0.35, 0.7, 4),
     new THREE.MeshStandardMaterial({ color })
   );
-  tail.position.x = -0.85;
+
+  tail.position.x = -0.8;
   tail.rotation.z = Math.PI / 2;
   fish.add(tail);
 
   fish.position.set(
-    Math.random() * 120 - 60,
+    Math.random() * 150 - 75,
     -1.5,
-    Math.random() * 120 - 60
+    Math.random() * 150 - 75
   );
 
   scene.add(fish);
   fishList.push(fish);
 }
 
-// Oyun değişkenleri
+// =====================================
+// GAME VARIABLES
+// =====================================
+
 let gameStarted = false;
 let firstPerson = false;
+
 let speed = 0;
+let throttle = 0;
 let steering = 0;
 let money = 1000;
 let caught = 0;
 
-let gasPressed = false;
-let brakePressed = false;
-let wheelPressed = false;
+let wheelDragging = false;
+let throttleDragging = false;
 
-const menu = document.getElementById("menu");
-const hud = document.getElementById("hud");
-const controls = document.getElementById("controls");
-const cameraButton = document.getElementById("camera");
-const fishButton = document.getElementById("fish");
-const moneyText = document.getElementById("money");
-const caughtText = document.getElementById("caught");
-const message = document.getElementById("message");
-const wheelButton = document.getElementById("wheel");
+const $ = id => document.getElementById(id);
 
-// Başlat
-document.getElementById("start").addEventListener("click", () => {
+const menu = $("menu");
+const startButton = $("startBtn");
+const hud = $("hud");
+const moneyText = $("money");
+const caughtText = $("caught");
+const speedText = $("speed");
+
+const wheel = $("wheel");
+const throttleTrack = $("throttle");
+const throttleHandle = $("throttleHandle");
+
+const brakeButton = $("brakeBtn");
+const cameraButton = $("cameraBtn");
+const fishButton = $("fishBtn");
+
+// =====================================
+// START GAME
+// =====================================
+
+startButton.addEventListener("click", () => {
   gameStarted = true;
+
   menu.style.display = "none";
   hud.style.display = "block";
-  controls.style.display = "flex";
+
+  $("gameControls").style.display = "flex";
   cameraButton.style.display = "block";
   fishButton.style.display = "block";
 });
 
-// Kamera değiştir
+// =====================================
+// STEERING WHEEL
+// =====================================
+
+function updateSteering(e) {
+  const rect = wheel.getBoundingClientRect();
+
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  const dx = e.clientX - cx;
+  const dy = e.clientY - cy;
+
+  steering = THREE.MathUtils.clamp(dx / (rect.width * 0.35), -1, 1);
+
+  wheel.style.transform = `rotate(${steering * 110}deg)`;
+}
+
+wheel.addEventListener("pointerdown", e => {
+  wheelDragging = true;
+  wheel.setPointerCapture(e.pointerId);
+  updateSteering(e);
+});
+
+wheel.addEventListener("pointermove", e => {
+  if (wheelDragging) updateSteering(e);
+});
+
+function releaseWheel() {
+  wheelDragging = false;
+}
+
+wheel.addEventListener("pointerup", releaseWheel);
+wheel.addEventListener("pointercancel", releaseWheel);
+
+// =====================================
+// THROTTLE LEVER
+// =====================================
+
+function updateThrottle(e) {
+  const rect = throttleTrack.getBoundingClientRect();
+
+  const position = THREE.MathUtils.clamp(
+    (e.clientY - rect.top) / rect.height,
+    0,
+    1
+  );
+
+  // Yukarı = ileri, orta = boş, aşağı = geri
+  throttle = 1 - position * 2;
+
+  throttleHandle.style.top = `${position * 100}%`;
+}
+
+throttleHandle.addEventListener("pointerdown", e => {
+  throttleDragging = true;
+  throttleHandle.setPointerCapture(e.pointerId);
+  updateThrottle(e);
+});
+
+throttleHandle.addEventListener("pointermove", e => {
+  if (throttleDragging) updateThrottle(e);
+});
+
+function releaseThrottle() {
+  throttleDragging = false;
+}
+
+throttleHandle.addEventListener("pointerup", releaseThrottle);
+throttleHandle.addEventListener("pointercancel", releaseThrottle);
+
+// =====================================
+// BRAKE
+// =====================================
+
+let braking = false;
+
+brakeButton.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  braking = true;
+});
+
+brakeButton.addEventListener("pointerup", () => braking = false);
+brakeButton.addEventListener("pointerleave", () => braking = false);
+brakeButton.addEventListener("pointercancel", () => braking = false);
+
+// =====================================
+// CAMERA
+// =====================================
+
 cameraButton.addEventListener("click", () => {
   firstPerson = !firstPerson;
   cameraButton.textContent = firstPerson ? "🚤" : "📷";
 });
 
-// Gaz
-const gas = document.getElementById("forward");
-gas.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  gasPressed = true;
-});
-gas.addEventListener("pointerup", () => gasPressed = false);
-gas.addEventListener("pointerleave", () => gasPressed = false);
-gas.addEventListener("pointercancel", () => gasPressed = false);
+// =====================================
+// FISHING
+// =====================================
 
-// Fren
-const brake = document.getElementById("brake");
-brake.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  brakePressed = true;
-});
-brake.addEventListener("pointerup", () => brakePressed = false);
-brake.addEventListener("pointerleave", () => brakePressed = false);
-brake.addEventListener("pointercancel", () => brakePressed = false);
-
-// Direksiyon
-function steerFromPointer(e) {
-  const rect = wheelButton.getBoundingClientRect();
-  const center = rect.left + rect.width / 2;
-  steering = THREE.MathUtils.clamp(
-    (e.clientX - center) / (rect.width / 2),
-    -1,
-    1
-  );
-}
-
-wheelButton.addEventListener("pointerdown", e => {
-  wheelPressed = true;
-  wheelButton.setPointerCapture(e.pointerId);
-  steerFromPointer(e);
-});
-
-wheelButton.addEventListener("pointermove", e => {
-  if (wheelPressed) steerFromPointer(e);
-});
-
-wheelButton.addEventListener("pointerup", () => {
-  wheelPressed = false;
-});
-
-wheelButton.addEventListener("pointercancel", () => {
-  wheelPressed = false;
-});
-
-// Klavye kontrolü
-const keys = {};
-
-window.addEventListener("keydown", e => {
-  keys[e.key.toLowerCase()] = true;
-});
-
-window.addEventListener("keyup", e => {
-  keys[e.key.toLowerCase()] = false;
-});
-
-// Balık tut
 fishButton.addEventListener("click", () => {
-  if (!gameStarted) return;
-
-  if (speed > 0.15) {
+  if (Math.abs(speed) > 0.5) {
     showMessage("Önce tekneyi durdur!");
     return;
   }
 
   caught++;
+
   const reward = Math.floor(Math.random() * 400) + 100;
   money += reward;
 
   moneyText.textContent = money;
   caughtText.textContent = caught;
 
-  showMessage("🐟 Balık yakaladın! +" + reward + " TL");
+  showMessage(`🐟 Balık yakaladın! +${reward} TL`);
 });
 
-// Mesaj
-let messageTimeout;
+// =====================================
+// MESSAGE
+// =====================================
+
+let messageTimer;
 
 function showMessage(text) {
+  const message = $("message");
   message.textContent = text;
   message.style.display = "block";
 
-  clearTimeout(messageTimeout);
-  messageTimeout = setTimeout(() => {
+  clearTimeout(messageTimer);
+
+  messageTimer = setTimeout(() => {
     message.style.display = "none";
   }, 2500);
 }
 
-// Kamera konumu
+// =====================================
+// CAMERA FOLLOW
+// =====================================
+
 function updateCamera() {
-  const direction = new THREE.Vector3(
-    Math.sin(boat.rotation.y),
+  const forward = new THREE.Vector3(
+    -Math.sin(boat.rotation.y),
     0,
-    Math.cos(boat.rotation.y)
+    -Math.cos(boat.rotation.y)
   );
 
   if (firstPerson) {
     camera.position.set(
-      boat.position.x + direction.x * 0.3,
-      3.3,
-      boat.position.z + direction.z * 0.3
+      boat.position.x,
+      boat.position.y + 3.2,
+      boat.position.z
     );
 
     camera.lookAt(
-      boat.position.x + direction.x * 18,
-      2,
-      boat.position.z + direction.z * 18
+      boat.position.x + forward.x * 18,
+      boat.position.y + 1.5,
+      boat.position.z + forward.z * 18
     );
   } else {
     camera.position.set(
-      boat.position.x - direction.x * 12,
-      8,
-      boat.position.z - direction.z * 12
+      boat.position.x - forward.x * 13,
+      boat.position.y + 8,
+      boat.position.z - forward.z * 13
     );
 
     camera.lookAt(
       boat.position.x,
-      1,
+      boat.position.y + 1,
       boat.position.z
     );
   }
 }
 
-// Başlangıç
-boat.position.set(0, 0, 0);
-camera.position.set(0, 8, 14);
-camera.lookAt(0, 0, 0);
+// =====================================
+// GAME LOOP
+// =====================================
 
-// Animasyon
 const clock = new THREE.Clock();
 
 function animate() {
@@ -376,53 +459,61 @@ function animate() {
   const delta = Math.min(clock.getDelta(), 0.05);
 
   if (gameStarted) {
-    if (gasPressed || keys["w"] || keys["arrowup"]) {
-      speed += delta * 1.5;
-    } else if (brakePressed || keys["s"] || keys["arrowdown"]) {
-      speed -= delta * 2;
+    if (Math.abs(throttle) > 0.05) {
+      speed += throttle * delta * 5;
     } else {
-      speed *= 0.98;
+      speed *= Math.pow(0.97, delta * 60);
     }
 
-    speed = THREE.MathUtils.clamp(speed, 0, 12);
-
-    let steerInput = steering;
-
-    if (!wheelPressed) {
-      if (keys["a"] || keys["arrowleft"]) steerInput = -1;
-      else if (keys["d"] || keys["arrowright"]) steerInput = 1;
-      else steerInput = 0;
+    if (braking) {
+      speed *= Math.pow(0.90, delta * 60);
     }
 
-    boat.rotation.y -= steerInput * delta * (0.8 + speed * 0.08);
+    speed = THREE.MathUtils.clamp(speed, -12, 18);
 
-    boat.position.x -= Math.sin(boat.rotation.y) * speed * delta;
-    boat.position.z -= Math.cos(boat.rotation.y) * speed * delta;
+    if (!wheelDragging) {
+      steering *= Math.pow(0.90, delta * 60);
+      wheel.style.transform = `rotate(${steering * 110}deg)`;
+    }
 
-    steeringWheel.rotation.z = -steerInput * 0.9;
+    boat.rotation.y += steering * delta * (0.45 + Math.abs(speed) * 0.06);
+
+    const forwardX = -Math.sin(boat.rotation.y);
+    const forwardZ = -Math.cos(boat.rotation.y);
+
+    boat.position.x += forwardX * speed * delta;
+    boat.position.z += forwardZ * speed * delta;
 
     boat.position.y = Math.sin(clock.elapsedTime * 1.5) * 0.08;
+
+    speedText.textContent = Math.round(Math.abs(speed));
   }
+
+  ocean.position.x = boat.position.x;
+  ocean.position.z = boat.position.z;
 
   fishList.forEach((fish, i) => {
     fish.position.x += Math.sin(clock.elapsedTime + i) * delta * 0.4;
     fish.rotation.y = Math.sin(clock.elapsedTime + i) * 0.2;
   });
 
-  ocean.position.x = boat.position.x;
-  ocean.position.z = boat.position.z;
-
   updateCamera();
-
   renderer.render(scene, camera);
 }
 
+boat.position.set(0, 0, 0);
+camera.position.set(0, 8, 14);
+camera.lookAt(0, 0, 0);
+
 animate();
 
-// Ekran boyutu
+// =====================================
+// RESIZE
+// =====================================
+
 window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(innerWidth, innerHeight);
 });
   
